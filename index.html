@@ -1,0 +1,2699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StayCraft Studio — Interactive Multilingual Guidebook & Expiring Guest Pass</title>
+    <!-- Web App & PWA Metadata -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1E293B">
+    <!-- Tailwind CSS & Phosphor Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --theme-primary: #C86D51;
+            --theme-primary-hover: #b55d42;
+            --theme-bg: #FAF6F0;
+            --theme-accent: #FEF3C7;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-serif-editorial {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.65);
+        }
+        /* Hotspot Pulse Animation */
+        @keyframes hotspot-pulse {
+            0% { transform: translate(-50%, -50%) scale(0.96); box-shadow: 0 0 0 0 rgba(200, 109, 81, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.06); box-shadow: 0 0 0 10px rgba(200, 109, 81, 0); }
+            100% { transform: translate(-50%, -50%) scale(0.96); box-shadow: 0 0 0 0 rgba(200, 109, 81, 0); }
+        }
+        .hotspot-pin {
+            animation: hotspot-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        /* Print Styles: High-Res Dual-QR A4 Sheet */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            #studio-header, #builder-sidebar, #preview-floating-controls, #print-action-bar, #time-travel-tester {
+                display: none !important;
+            }
+            #guest-phone-wrapper {
+                display: none !important;
+            }
+            #print-view-wrapper {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #a4-printable-sheet {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 14mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: #FAF6F0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- ========================================================================= -->
+    <!-- 1. TOP STUDIO CONTROL BAR (Host Builder)                                   -->
+    <!-- ========================================================================= -->
+    <header id="studio-header" class="h-16 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 flex items-center justify-between shrink-0 z-30">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
+                <i class="ph-fill ph-house-line text-xl text-white"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-base tracking-tight text-white">StayCraft</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Auto-Expiring Passes</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hidden sm:inline">5 Languages Active</span>
+                </div>
+                <p class="text-[11px] text-slate-400 hidden sm:block">Smart Auto-Expiring Guidebooks & Permanent Dual-QR Frame</p>
+            </div>
+        </div>
+
+        <!-- 1-Click Turnkey Property Presets -->
+        <div class="hidden xl:flex items-center gap-2 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-xs">
+            <span class="text-[10px] uppercase font-bold text-slate-400 pl-2 pr-1">✨ Template:</span>
+            <button onclick="loadPropertyPreset('villa')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">Villa</button>
+            <button onclick="loadPropertyPreset('cabin')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">Cabin</button>
+            <button onclick="loadPropertyPreset('loft')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">City Loft</button>
+        </div>
+
+        <!-- View Mode Switcher -->
+        <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+            <button onclick="setStudioMode('split')" id="mode-btn-split" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-amber-500 text-slate-950 shadow">
+                <i class="ph-bold ph-sliders-horizontal"></i>
+                <span class="hidden sm:inline">Editor</span>
+            </button>
+            <button onclick="setStudioMode('guest')" id="mode-btn-guest" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white">
+                <i class="ph-bold ph-device-mobile"></i>
+                <span>Guest App</span>
+            </button>
+            <button onclick="setStudioMode('print')" id="mode-btn-print" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white">
+                <i class="ph-bold ph-printer"></i>
+                <span>Permanent A4 Sign</span>
+            </button>
+        </div>
+
+        <!-- Export & Reset Actions -->
+        <div class="flex items-center gap-2">
+            <button onclick="resetToDefaultsPrompt()" title="Reset to Sample Data" class="p-2 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 text-xs transition">
+                <i class="ph-bold ph-arrow-counter-clockwise text-base"></i>
+            </button>
+            <button onclick="exportProjectJSON()" title="Download Backup JSON" class="hidden sm:flex px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium items-center gap-1.5 transition">
+                <i class="ph-bold ph-download-simple text-amber-400"></i>
+                <span>Backup</span>
+            </button>
+            <button onclick="exportStandaloneGuestApp()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition cursor-pointer">
+                <i class="ph-bold ph-export text-base"></i>
+                <span>Export Guest App (.html)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- 2. TIME-TRAVEL SIMULATOR TESTING BAR (Creator & Host Security Test)        -->
+    <!-- ========================================================================= -->
+    <div id="time-travel-tester" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-indigo-500/30 px-4 py-2 flex items-center justify-between text-xs shrink-0 z-20">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
+            <span class="font-bold text-white flex items-center gap-1">
+                <i class="ph-bold ph-hourglass-medium text-amber-400"></i>
+                Security Life-Cycle Simulation:
+            </span>
+            <span class="text-slate-400 text-[11px] hidden md:inline">Test what the guest sees at each stage of their reservation</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+            <button onclick="setStaySimulationStage('upcoming')" id="stage-btn-upcoming" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1">
+                <i class="ph-bold ph-lock-key"></i> 1. Pre-Arrival (Locked Door)
+            </button>
+            <button onclick="setStaySimulationStage('active')" id="stage-btn-active" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition flex items-center gap-1">
+                <i class="ph-bold ph-key"></i> 2. Active Stay (Full Access)
+            </button>
+            <button onclick="setStaySimulationStage('expired')" id="stage-btn-expired" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1">
+                <i class="ph-bold ph-shield-slash"></i> 3. Checkout (Auto-Expired & Wiped)
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. MAIN WORKSPACE                                                         -->
+    <!-- ========================================================================= -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- LEFT SIDEBAR: HOST BUILDER & LOCALIZER -->
+        <aside id="builder-sidebar" class="w-full lg:w-[480px] xl:w-[520px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-20 transition-all duration-300">
+            
+            <!-- Category Navigation Tabs (Now 6 Tabs with Guest Passes) -->
+            <div class="grid grid-cols-6 gap-1 p-2 bg-slate-950/90 border-b border-slate-800 text-[10px] font-semibold">
+                <button onclick="switchEditorTab('general')" id="ed-tab-general" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 bg-slate-800 text-amber-400 border border-slate-700 shadow-sm transition-all">
+                    <i class="ph-bold ph-sparkle text-sm"></i>
+                    <span class="tracking-tight">Brand & Info</span>
+                </button>
+                <button onclick="switchEditorTab('passes')" id="ed-tab-passes" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all relative">
+                    <i class="ph-bold ph-ticket text-sm text-emerald-400"></i>
+                    <span class="tracking-tight font-bold text-emerald-300">Guest Passes</span>
+                    <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400"></span>
+                </button>
+                <button onclick="switchEditorTab('floorplan')" id="ed-tab-floorplan" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all">
+                    <i class="ph-bold ph-map-pin-line text-sm"></i>
+                    <span class="tracking-tight">Floorplan</span>
+                </button>
+                <button onclick="switchEditorTab('rules')" id="ed-tab-rules" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all">
+                    <i class="ph-bold ph-check-square-offset text-sm"></i>
+                    <span class="tracking-tight">Check-Out</span>
+                </button>
+                <button onclick="switchEditorTab('local')" id="ed-tab-local" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all">
+                    <i class="ph-bold ph-compass text-sm"></i>
+                    <span class="tracking-tight">Local Gems</span>
+                </button>
+                <button onclick="switchEditorTab('share')" id="ed-tab-share" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all">
+                    <i class="ph-bold ph-printer text-sm"></i>
+                    <span class="tracking-tight">Table Sign</span>
+                </button>
+            </div>
+
+            <!-- Scrollable Tab Form -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-5 select-text">
+
+                <!-- TAB 1: BRAND, AUTO-TRANSLATE & PROPERTY IDENTITY -->
+                <div id="ed-pane-general" class="space-y-4">
+
+                    <!-- ✨ 1-CLICK MULTI-LANGUAGE AUTO-TRANSLATE ENGINE -->
+                    <div class="bg-gradient-to-br from-indigo-950/60 via-slate-800/50 to-amber-950/40 border border-indigo-500/40 rounded-2xl p-4 space-y-3 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+                                    <i class="ph-fill ph-translate"></i>
+                                </span>
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-300">Multi-Language AI Engine</h3>
+                                    <p class="text-[10px] text-slate-400">Zero host effort: Write once in English, serve 5 languages</p>
+                                </div>
+                            </div>
+                            <span id="trans-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Synced</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                            <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-300">
+                                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-mono">EN</span>
+                                <i class="ph-bold ph-arrow-right text-slate-500"></i>
+                                <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">IT</span>
+                                <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">ES</span>
+                                <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">FR</span>
+                                <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">DE</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400">Pre-baked & Offline</span>
+                        </div>
+
+                        <button onclick="autoTranslateAllContent()" id="btn-auto-translate" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-600 to-amber-500 hover:from-indigo-400 hover:to-amber-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer">
+                            <i id="btn-trans-icon" class="ph-bold ph-sparkle text-sm"></i>
+                            <span id="btn-trans-label">✨ Auto-Translate All Instructions to IT, ES, FR, DE</span>
+                        </button>
+                    </div>
+
+                    <!-- Color Themes -->
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                                <i class="ph-fill ph-paint-brush"></i> 1. Color Theme Palette
+                            </h3>
+                            <span class="text-[10px] text-slate-400">Luxury Aesthetic</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setThemePreset('terracotta')" id="theme-btn-terracotta" class="p-2 rounded-xl border border-amber-500 bg-slate-800/90 text-left transition flex flex-col items-center gap-1">
+                                <span class="w-5 h-5 rounded-full bg-[#C86D51] shadow-inner"></span>
+                                <span class="text-[11px] font-semibold text-white">Terracotta</span>
+                            </button>
+                            <button onclick="setThemePreset('sage')" id="theme-btn-sage" class="p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col items-center gap-1">
+                                <span class="w-5 h-5 rounded-full bg-[#3F6252] shadow-inner"></span>
+                                <span class="text-[11px] font-semibold text-white">Olive Sage</span>
+                            </button>
+                            <button onclick="setThemePreset('coastal')" id="theme-btn-coastal" class="p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col items-center gap-1">
+                                <span class="w-5 h-5 rounded-full bg-[#1E4E68] shadow-inner"></span>
+                                <span class="text-[11px] font-semibold text-white">Amalfi Blue</span>
+                            </button>
+                            <button onclick="setThemePreset('noir')" id="theme-btn-noir" class="p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col items-center gap-1">
+                                <span class="w-5 h-5 rounded-full bg-[#27272A] shadow-inner"></span>
+                                <span class="text-[11px] font-semibold text-white">Chic Noir</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Property Info -->
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                            <i class="ph-fill ph-house"></i> Property Identity
+                        </h3>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Property Name / Villa Title</label>
+                            <input type="text" id="inp-prop-name" oninput="updateField('propertyName', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Location Subtitle</label>
+                                <input type="text" id="inp-prop-loc" oninput="updateField('location', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Host Name(s)</label>
+                                <input type="text" id="inp-host-name" oninput="updateField('hostName', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Hero Image URL</label>
+                            <input type="text" id="inp-hero-img" oninput="updateField('heroImage', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">Standard Check-In</label>
+                                <input type="text" id="inp-checkin" oninput="updateField('checkInTime', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">Standard Check-Out</label>
+                                <input type="text" id="inp-checkout" oninput="updateField('checkOutTime', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instant Wi-Fi & Contacts -->
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                            <i class="ph-fill ph-wifi-high"></i> Permanent Wi-Fi & Direct Contact
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Wi-Fi Network (SSID)</label>
+                                <input type="text" id="inp-wifi-ssid" oninput="updateField('wifiName', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Wi-Fi Password</label>
+                                <input type="text" id="inp-wifi-pass" oninput="updateField('wifiPass', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-emerald-400 focus:border-amber-500 focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Host Phone / WhatsApp</label>
+                                <input type="text" id="inp-host-phone" placeholder="+1 555 123 4567" oninput="updateField('hostPhone', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Street Address</label>
+                                <input type="text" id="inp-address" oninput="updateField('address', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: ✨ GUEST PASSES & AUTO-EXPIRING BOOKINGS ENGINE -->
+                <div id="ed-pane-passes" class="space-y-4 hidden">
+                    
+                    <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                                    <i class="ph-fill ph-ticket"></i>
+                                </span>
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-300">Generate Guest Pass</h3>
+                                    <p class="text-[10px] text-slate-400">Door code auto-activates at check-in and wipes at checkout</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Secure</span>
+                        </div>
+
+                        <!-- Form: New Booking -->
+                        <div class="space-y-2.5 pt-1">
+                            <div>
+                                <label class="block text-[11px] text-slate-300 font-semibold mb-1">Guest Name(s)</label>
+                                <input type="text" id="inp-pass-guest" value="Sarah & James" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none" placeholder="e.g. Sarah Miller">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-1">Check-In Date & Time</label>
+                                    <input type="datetime-local" id="inp-pass-checkin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-white focus:border-emerald-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-1">Check-Out Date & Time</label>
+                                    <input type="datetime-local" id="inp-pass-checkout" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-white focus:border-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] text-slate-300 font-semibold mb-1">Smart Door Lock Code For This Stay</label>
+                                <input type="text" id="inp-pass-doorcode" value="#4829*" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono focus:border-emerald-500 focus:outline-none" placeholder="#4829*">
+                            </div>
+
+                            <button onclick="createNewGuestPass()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition cursor-pointer">
+                                <i class="ph-bold ph-plus-circle text-base"></i>
+                                <span>Generate New Auto-Expiring Pass</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Active Guest Pass Card & 1-Click Airbnb Message -->
+                    <div id="active-pass-container" class="bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Current Selected Pass</span>
+                            <span id="pass-status-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active Stay</span>
+                        </div>
+
+                        <div>
+                            <h4 id="pass-display-guest" class="text-sm font-bold text-white">Sarah & James</h4>
+                            <p id="pass-display-dates" class="text-[11px] text-slate-400 mt-0.5">Nov 18, 3:00 PM → Nov 21, 11:00 AM</p>
+                        </div>
+
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-[11px] text-emerald-400 break-all select-all flex items-center justify-between gap-2">
+                            <span id="pass-display-url">https://staycraft.app/villasolis/pass-8821</span>
+                            <button onclick="copyGeneratedPassUrl()" class="px-2 py-1 rounded bg-slate-800 text-slate-200 hover:text-white text-[10px] shrink-0">Copy Link</button>
+                        </div>
+
+                        <!-- 1-Click Airbnb Chat Template -->
+                        <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                                    <i class="ph-bold ph-chat-circle-dots"></i> Ready Airbnb / WhatsApp Message
+                                </span>
+                                <span class="text-[9px] text-slate-500">Allowed post-booking</span>
+                            </div>
+                            <p id="pass-airbnb-msg" class="text-[11px] text-slate-300 leading-relaxed italic bg-slate-900 p-2 rounded-lg border border-slate-800"></p>
+                            <button onclick="copyAirbnbMessageTemplate()" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                <i class="ph-bold ph-copy"></i>
+                                <span>Copy Ready Message for Airbnb Chat</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Past / Upcoming Bookings List -->
+                    <div class="space-y-2 pt-1">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">All Created Passes</h4>
+                        <div id="passes-history-list" class="space-y-2"></div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 3: FLOORPLAN & APPLIANCE HOTSPOTS -->
+                <div id="ed-pane-floorplan" class="space-y-4 hidden">
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                                <i class="ph-fill ph-blueprint"></i> Floorplan Architectural Layout
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setFloorplanType('blueprint-villa')" id="fp-btn-villa" class="p-2 rounded-xl border border-amber-500 bg-slate-800/90 text-left transition flex flex-col gap-1">
+                                <span class="text-[10px] font-bold uppercase text-amber-400">Preset 1</span>
+                                <span class="text-xs font-semibold text-white">1-Bed Villa</span>
+                            </button>
+                            <button onclick="setFloorplanType('blueprint-cabin')" id="fp-btn-cabin" class="p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col gap-1">
+                                <span class="text-[10px] font-bold uppercase text-slate-400">Preset 2</span>
+                                <span class="text-xs font-semibold text-white">2-Bed Suite</span>
+                            </button>
+                            <button onclick="setFloorplanType('blueprint-loft')" id="fp-btn-loft" class="p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col gap-1">
+                                <span class="text-[10px] font-bold uppercase text-slate-400">Preset 3</span>
+                                <span class="text-xs font-semibold text-white">Studio Loft</span>
+                            </button>
+                        </div>
+                        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+                            <label class="block text-xs font-medium text-slate-300">Or Upload Custom Floorplan Photo:</label>
+                            <div class="flex items-center gap-2">
+                                <label class="flex-1 cursor-pointer py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-amber-300 flex items-center justify-center gap-1.5 transition">
+                                    <i class="ph-bold ph-upload-simple"></i>
+                                    <span>Upload Floorplan Image</span>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleFloorplanFileUpload(event)">
+                                </label>
+                                <button onclick="setFloorplanType('blueprint-villa')" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 hover:text-white transition">
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-xs text-amber-200 flex items-start gap-2.5">
+                        <i class="ph-fill ph-hand-tap text-base text-amber-400 shrink-0 mt-0.5"></i>
+                        <div>
+                            <span class="font-bold text-white">Interactive Pin Placement:</span> Click any spot on the floorplan in the phone preview to reposition the active pin!
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Appliance & Room Pins</h3>
+                        <button onclick="addNewHotspot()" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition">
+                            <i class="ph-bold ph-plus"></i> Add Pin
+                        </button>
+                    </div>
+
+                    <div id="hotspot-editor-list" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 4: CHECKOUT TASKS & HOUSE RULES -->
+                <div id="ed-pane-rules" class="space-y-4 hidden">
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                                <i class="ph-fill ph-check-square-offset"></i> Interactive Departure Checklist
+                            </h3>
+                            <button onclick="addCheckoutTask()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold text-white">+ Add Task</button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Guests tap to check off items before departure.</p>
+                        <div id="checkout-editor-list" class="space-y-2"></div>
+                    </div>
+
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                                <i class="ph-fill ph-scroll"></i> House Golden Rules
+                            </h3>
+                            <button onclick="addHouseRule()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold text-white">+ Add Rule</button>
+                        </div>
+                        <div id="rules-editor-list" class="space-y-2.5"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: CURATED LOCAL GEMS -->
+                <div id="ed-pane-local" class="space-y-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Host's Local Recommendations</h3>
+                            <p class="text-[11px] text-slate-400">Bakeries, sunset spots & hidden beaches</p>
+                        </div>
+                        <button onclick="addLocalGem()" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1">
+                            <i class="ph-bold ph-plus"></i> Add Spot
+                        </button>
+                    </div>
+                    <div id="local-editor-list" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 6: PERMANENT TABLETOP SIGN & PUBLISHING -->
+                <div id="ed-pane-share" class="space-y-4 hidden">
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                            <i class="ph-fill ph-printer"></i> Permanent Tabletop A4 Sign
+                        </h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <b class="text-white">You never need to reprint this!</b> The physical sign on the table has the permanent native Wi-Fi QR code and the general house manual QR code. The door code stays securely inside the temporary chat pass.
+                        </p>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Permanent Property Guidebook Address</label>
+                            <input type="text" id="inp-guidebook-url" oninput="updateField('guidebookUrl', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <button onclick="setStudioMode('print')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="ph-bold ph-printer"></i> Preview & Print Permanent A4 Sign
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- CENTER/RIGHT AREA: INTERACTIVE PHONE SIMULATOR OR A4 PRINT FRAME -->
+        <main class="flex-1 bg-slate-950 relative overflow-y-auto flex items-center justify-center p-4 lg:p-8" style="background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px); background-size: 24px 24px;">
+
+            <!-- VIEW 1: GUEST PHONE SIMULATOR -->
+            <div id="guest-phone-wrapper" class="w-full max-w-[412px] h-[830px] max-h-[92vh] bg-[#FAF6F0] text-slate-800 rounded-[44px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] border-[10px] border-slate-900 ring-1 ring-slate-700/70 flex flex-col overflow-hidden relative transition-all duration-300 select-none">
+                
+                <!-- Phone Speaker Notch -->
+                <div id="phone-speaker-notch" class="w-32 h-5 bg-slate-900 rounded-b-2xl mx-auto absolute top-0 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center">
+                    <div class="w-10 h-1 bg-slate-800 rounded-full"></div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- GUEST STATE A: UPCOMING / PRE-ARRIVAL      -->
+                <!-- ========================================== -->
+                <div id="guest-state-upcoming" class="flex-1 overflow-y-auto p-5 hidden flex-col justify-between select-text pt-10">
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center text-2xl mx-auto shadow-sm">
+                            <i class="ph-duotone ph-lock-key"></i>
+                        </div>
+                        <div class="text-center space-y-1">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-700">Reservation Confirmed</span>
+                            <h2 class="font-serif-editorial text-2xl font-bold text-stone-900" id="upcoming-prop-name">Villa Solis Sanctuary</h2>
+                            <p class="text-xs text-stone-500" id="upcoming-guest-greeting">Welcome, Sarah & James!</p>
+                        </div>
+
+                        <!-- Countdown Card -->
+                        <div class="bg-amber-50/80 border border-amber-200/90 rounded-3xl p-4 text-center space-y-1.5 shadow-sm">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">Arrival Timeline</span>
+                            <h3 class="text-base font-bold text-stone-900" id="upcoming-countdown-text">Check-in at 3:00 PM</h3>
+                            <p class="text-[11px] text-stone-600 leading-snug">
+                                For your security, the smart door lock code will automatically activate on arrival date.
+                            </p>
+                        </div>
+
+                        <!-- Locked Door Box -->
+                        <div class="bg-stone-100 rounded-3xl p-4 border border-stone-200 text-center space-y-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Smart Door Code</span>
+                            <div class="flex items-center justify-center gap-2 text-stone-400 py-1">
+                                <i class="ph-bold ph-lock text-base"></i>
+                                <span class="font-mono text-sm tracking-widest font-bold">•••••••</span>
+                            </div>
+                            <span class="text-[10px] text-amber-700 font-semibold block" id="upcoming-unlock-time">Unlocks Nov 18 at 3:00 PM</span>
+                        </div>
+
+                        <!-- Directions & Address -->
+                        <div class="bg-white rounded-3xl p-4 border border-stone-200 shadow-sm space-y-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Arrival Location</span>
+                            <p class="text-xs font-semibold text-stone-800" id="upcoming-address">Via Cristoforo Colombo 42, Positano SA, Italy</p>
+                            <div class="pt-2 flex gap-2">
+                                <button onclick="copyTextToClipboard(state.address, 'Address copied!')" class="flex-1 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center justify-center gap-1">
+                                    <i class="ph-bold ph-copy"></i> Copy Address
+                                </button>
+                                <a id="upcoming-maps-btn" href="https://maps.google.com" target="_blank" class="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition flex items-center justify-center gap-1">
+                                    <i class="ph-bold ph-navigation-arrow"></i> Open Maps
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 text-center">
+                        <p class="text-[11px] text-stone-400">Questions before arrival? Contact your host below.</p>
+                        <a id="upcoming-host-whatsapp" href="#" target="_blank" class="mt-2 w-full py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                            <i class="ph-fill ph-whatsapp-logo text-base"></i> Message Host on WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- GUEST STATE B: ACTIVE STAY (FULL ACCESS)   -->
+                <!-- ========================================== -->
+                <div id="guest-state-active" class="flex-1 flex flex-col overflow-hidden relative">
+
+                    <!-- PHONE SCROLLABLE VIEWPORT -->
+                    <div id="guest-app-scroll" class="flex-1 overflow-y-auto pb-24">
+
+                        <!-- HERO COVER PHOTO -->
+                        <div class="relative h-60 w-full overflow-hidden">
+                            <img id="view-hero-img" src="" alt="Property Hero" class="w-full h-full object-cover transition-all duration-500" onerror="this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1000&q=80'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/25"></div>
+
+                            <!-- Multi-Language Pill Switcher -->
+                            <div class="absolute top-7 right-4 z-20 flex items-center bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20 text-[10px] text-white shadow-lg gap-0.5">
+                                <button onclick="setGuestLang('en')" id="lang-btn-en" class="px-2.5 py-1 rounded-full font-bold bg-white text-slate-900 transition">EN</button>
+                                <button onclick="setGuestLang('it')" id="lang-btn-it" class="px-2.5 py-1 rounded-full font-medium text-white/80 hover:text-white transition">IT</button>
+                                <button onclick="setGuestLang('es')" id="lang-btn-es" class="px-2.5 py-1 rounded-full font-medium text-white/80 hover:text-white transition">ES</button>
+                                <button onclick="setGuestLang('fr')" id="lang-btn-fr" class="px-2.5 py-1 rounded-full font-medium text-white/80 hover:text-white transition">FR</button>
+                                <button onclick="setGuestLang('de')" id="lang-btn-de" class="px-2.5 py-1 rounded-full font-medium text-white/80 hover:text-white transition">DE</button>
+                            </div>
+
+                            <!-- Title and Host Overlay -->
+                            <div class="absolute bottom-4 left-5 right-5 text-white">
+                                <div class="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-amber-300 font-bold bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/10 mb-1.5">
+                                    <i class="ph-fill ph-map-pin"></i>
+                                    <span id="view-prop-loc">Amalfi Coast, Italy</span>
+                                </div>
+                                <h1 id="view-prop-name" class="font-serif-editorial text-2xl font-bold leading-tight tracking-tight">Villa Solis Sanctuary</h1>
+                                <p class="text-xs text-white/85 mt-1 flex items-center gap-1.5">
+                                    <span id="i18n-hosted-by">Hosted by</span> <strong id="view-host-name" class="text-white font-semibold underline decoration-amber-400/80 underline-offset-2">Elena & Marco</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- TIME-AWARE DYNAMIC CONTEXT BANNER -->
+                        <div id="dynamic-context-banner" class="mx-4 mt-3 p-3 rounded-2xl flex items-center gap-2.5 text-xs shadow-sm transition-all duration-300 cursor-pointer">
+                            <i id="context-banner-icon" class="ph-fill ph-sparkle text-lg shrink-0"></i>
+                            <div class="min-w-0 flex-1">
+                                <span id="context-banner-title" class="font-bold block truncate">Welcome!</span>
+                                <span id="context-banner-sub" class="text-[11px] opacity-90 block">Tap for Wi-Fi & Smart Door Code.</span>
+                            </div>
+                        </div>
+
+                        <!-- GUEST PANE 1: HOME & WELCOME -->
+                        <div id="guest-tab-home" class="p-4 space-y-3.5">
+
+                            <!-- Quick Times & Door Keycode -->
+                            <div class="grid grid-cols-3 gap-2.5">
+                                <div class="bg-white p-3 rounded-2xl shadow-sm border border-stone-200/80 flex flex-col items-center justify-center text-center">
+                                    <div class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                                        <i class="ph-bold ph-clock text-amber-600"></i>
+                                        <span id="i18n-checkin">Check-In</span>
+                                    </div>
+                                    <span id="view-checkin" class="text-xs font-bold text-stone-800 mt-1 block">3:00 PM</span>
+                                </div>
+                                <div class="bg-white p-3 rounded-2xl shadow-sm border border-stone-200/80 flex flex-col items-center justify-center text-center">
+                                    <div class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                                        <i class="ph-bold ph-sign-out text-stone-500"></i>
+                                        <span id="i18n-checkout">Check-Out</span>
+                                    </div>
+                                    <span id="view-checkout" class="text-xs font-bold text-stone-800 mt-1 block">11:00 AM</span>
+                                </div>
+                                <button onclick="toggleKeycodeReveal()" class="bg-amber-50/70 hover:bg-amber-100/60 p-3 rounded-2xl shadow-sm border border-amber-200/90 flex flex-col items-center justify-center text-center group cursor-pointer transition">
+                                    <div class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                                        <i class="ph-bold ph-key"></i>
+                                        <span id="i18n-doorcode">Smart Lock</span>
+                                    </div>
+                                    <span id="view-doorcode" class="text-xs font-bold font-mono text-amber-700 mt-1 block">Tap to Show</span>
+                                </button>
+                            </div>
+
+                            <!-- ONE-TAP WI-FI CARD -->
+                            <div class="rounded-3xl p-4 text-white shadow-md relative overflow-hidden" style="background-color: var(--theme-primary, #C86D51);">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                                            <i class="ph-bold ph-wifi-high text-2xl"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <span id="i18n-wifi-title" class="text-[10px] uppercase tracking-wider text-white/80 font-bold block">Instant Wi-Fi</span>
+                                            <h3 id="view-wifi-ssid" class="text-sm font-bold truncate">VillaSolis_5G</h3>
+                                            <p class="text-xs text-white/95 font-mono mt-0.5 truncate"><span id="i18n-pass-label" class="opacity-75 font-sans">Pass:</span> <span id="view-wifi-pass" class="font-semibold">limoncello2025</span></p>
+                                        </div>
+                                    </div>
+                                    <button onclick="copyWifiPassword()" class="px-3 py-2 rounded-xl bg-white text-stone-900 font-bold text-xs shadow-sm hover:bg-stone-100 active:scale-95 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                                        <i class="ph-bold ph-copy text-sm"></i>
+                                        <span id="i18n-copy-btn">Copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Floorplan Tour Card Teaser -->
+                            <div onclick="switchGuestTab('floorplan')" class="bg-white rounded-3xl p-4 border border-stone-200/90 shadow-sm flex items-center justify-between gap-3 cursor-pointer hover:border-amber-400 transition group">
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0">
+                                        <i class="ph-duotone ph-map-trifold text-2xl"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h4 id="i18n-tour-card-title" class="text-sm font-bold text-stone-800">Interactive Floorplan</h4>
+                                            <span id="view-hotspot-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">4 Pins</span>
+                                        </div>
+                                        <p id="i18n-tour-card-sub" class="text-xs text-stone-500 mt-0.5 leading-snug">Visual guides for A/C, Coffee, and TV remotes</p>
+                                    </div>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-stone-100 group-hover:bg-amber-100 flex items-center justify-center text-stone-500 group-hover:text-amber-800 shrink-0 transition">
+                                    <i class="ph-bold ph-caret-right text-sm"></i>
+                                </div>
+                            </div>
+
+                            <!-- Address & Host Contact Card -->
+                            <div class="bg-white rounded-3xl p-4 border border-stone-200/90 shadow-sm space-y-3.5">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <span id="i18n-address-label" class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Property Address</span>
+                                        <p id="view-address" class="text-xs font-semibold text-stone-700 mt-0.5 leading-relaxed">Via Cristoforo Colombo 42, Positano SA, Italy</p>
+                                    </div>
+                                    <button onclick="copyTextToClipboard(state.address, 'Address copied to clipboard!')" class="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs shrink-0 flex items-center gap-1 transition cursor-pointer">
+                                        <i class="ph-bold ph-copy"></i>
+                                        <span id="i18n-copy-addr">Copy</span>
+                                    </button>
+                                </div>
+                                <div class="pt-3 border-t border-stone-100 flex items-center justify-between gap-3">
+                                    <div>
+                                        <span id="i18n-need-help" class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Host Direct Line</span>
+                                        <span id="view-host-phone" class="text-xs font-bold text-stone-800 mt-0.5 block">+39 089 812 3456</span>
+                                    </div>
+                                    <a id="view-whatsapp-link" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition shrink-0">
+                                        <i class="ph-fill ph-whatsapp-logo text-base"></i>
+                                        <span id="i18n-message-host">WhatsApp</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- GUEST PANE 2: INTERACTIVE FLOORPLAN -->
+                        <div id="guest-tab-floorplan" class="p-4 space-y-4 hidden">
+                            <div>
+                                <h2 id="i18n-fp-heading" class="font-serif-editorial text-xl font-bold text-stone-800">Interactive Floorplan</h2>
+                                <p id="i18n-fp-subheading" class="text-xs text-stone-500">Tap any pulsing pin to view appliance instructions</p>
+                            </div>
+
+                            <div id="floorplan-canvas" onclick="handleFloorplanCanvasClick(event)" class="relative w-full aspect-[4/3] bg-[#F4EFE6] rounded-3xl border-2 border-stone-300 shadow-inner overflow-hidden cursor-pointer">
+                                <div id="floorplan-bg-layer" class="w-full h-full select-none pointer-events-none"></div>
+                                <div id="floorplan-pins-layer" class="absolute inset-0"></div>
+                            </div>
+
+                            <!-- Active Hotspot Modal Card -->
+                            <div id="active-hotspot-card" class="bg-white rounded-3xl p-4 border border-stone-200 shadow-sm space-y-2 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <span id="spot-card-badge" class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Pin #1 • Kitchen</span>
+                                    <span class="text-xs text-stone-400" id="spot-card-icon"><i class="ph-fill ph-info"></i></span>
+                                </div>
+                                <h3 id="spot-card-title" class="text-base font-bold text-stone-800">Espresso Machine</h3>
+                                <p id="spot-card-desc" class="text-xs text-stone-600 leading-relaxed">
+                                    Flip main switch on left 10 minutes before brewing. Fresh beans in the canister.
+                                </p>
+                            </div>
+
+                            <div class="space-y-2 pt-1">
+                                <h4 id="i18n-all-guides" class="text-xs font-bold uppercase tracking-wider text-stone-400">All Appliance Guides</h4>
+                                <div id="guest-hotspot-list" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- GUEST PANE 3: CHECKOUT CHECKLIST & HOUSE RULES -->
+                        <div id="guest-tab-rules" class="p-4 space-y-4 hidden">
+                            <div>
+                                <h2 id="i18n-checkout-heading" class="font-serif-editorial text-xl font-bold text-stone-800">Departure Checklist</h2>
+                                <p id="i18n-checkout-sub" class="text-xs text-stone-500">Tap each task as you prepare for departure</p>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-3xl border border-stone-200/90 shadow-sm space-y-2.5">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span id="i18n-progress-label" class="font-semibold text-stone-700">Check-Out Progress</span>
+                                    <span id="checkout-progress-text" class="font-bold text-amber-700">0 / 4 Completed</span>
+                                </div>
+                                <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div id="checkout-progress-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <div id="guest-checkout-list" class="pt-2 space-y-2"></div>
+                            </div>
+
+                            <div class="space-y-2.5">
+                                <h3 id="i18n-rules-heading" class="font-serif-editorial text-lg font-bold text-stone-800">House Golden Rules</h3>
+                                <div id="guest-rules-list" class="space-y-2.5"></div>
+                            </div>
+                        </div>
+
+                        <!-- GUEST PANE 4: LOCAL RECOMMENDATIONS -->
+                        <div id="guest-tab-local" class="p-4 space-y-4 hidden">
+                            <div>
+                                <h2 id="i18n-local-heading" class="font-serif-editorial text-xl font-bold text-stone-800">Host's Local Favorites</h2>
+                                <p id="i18n-local-sub" class="text-xs text-stone-500">Curated spots tested and recommended by your host</p>
+                            </div>
+                            <div id="guest-local-list" class="space-y-3"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- PHONE BOTTOM NAVIGATION BAR -->
+                    <nav class="h-20 bg-white/95 backdrop-blur-md border-t border-stone-200/80 px-3 flex items-center justify-around absolute bottom-0 inset-x-0 z-20">
+                        <button onclick="switchGuestTab('home')" id="gnav-home" class="flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-amber-700 bg-amber-50/80 font-bold text-[11px] transition">
+                            <i class="ph-fill ph-house text-xl"></i>
+                            <span id="i18n-nav-home">Welcome</span>
+                        </button>
+                        <button onclick="switchGuestTab('floorplan')" id="gnav-floorplan" class="flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-stone-400 hover:text-stone-700 font-medium text-[11px] transition">
+                            <i class="ph-bold ph-map-pin-line text-xl"></i>
+                            <span id="i18n-nav-map">Floorplan</span>
+                        </button>
+                        <button onclick="switchGuestTab('rules')" id="gnav-rules" class="flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-stone-400 hover:text-stone-700 font-medium text-[11px] transition">
+                            <i class="ph-bold ph-check-square-offset text-xl"></i>
+                            <span id="i18n-nav-rules">Check-Out</span>
+                        </button>
+                        <button onclick="switchGuestTab('local')" id="gnav-local" class="flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-stone-400 hover:text-stone-700 font-medium text-[11px] transition">
+                            <i class="ph-bold ph-compass text-xl"></i>
+                            <span id="i18n-nav-local">Local Gems</span>
+                        </button>
+                    </nav>
+
+                </div>
+
+                <!-- ========================================== -->
+                <!-- GUEST STATE C: CONCLUDED / EXPIRED & WIPED -->
+                <!-- ========================================== -->
+                <div id="guest-state-expired" class="flex-1 overflow-y-auto p-6 hidden flex-col justify-between text-center select-text pt-12">
+                    <div class="space-y-5">
+                        <div class="w-16 h-16 rounded-3xl bg-stone-200/80 text-stone-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                            <i class="ph-fill ph-shield-check"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Stay Concluded</span>
+                            <h2 class="font-serif-editorial text-2xl font-bold text-stone-900">Thank You for Visiting!</h2>
+                            <p class="text-xs text-stone-500" id="expired-guest-farewell">We hope you loved your time at Villa Solis Sanctuary.</p>
+                        </div>
+
+                        <!-- Security Notice Box -->
+                        <div class="bg-stone-100 rounded-3xl p-4 border border-stone-200 text-left space-y-1.5">
+                            <div class="flex items-center gap-2 text-stone-700 font-bold text-xs">
+                                <i class="ph-fill ph-lock-key text-amber-700 text-sm"></i>
+                                <span>Security Auto-Lock Active</span>
+                            </div>
+                            <p class="text-[11px] text-stone-500 leading-relaxed">
+                                The smart lock code and private house access for this stay expired at checkout time.
+                            </p>
+                        </div>
+
+                        <!-- 5-Star Review Box -->
+                        <div class="bg-amber-50/70 border border-amber-200/80 rounded-3xl p-5 space-y-3">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">Enjoyed Your Stay?</span>
+                            <div class="flex items-center justify-center gap-1.5 text-amber-500 text-xl">
+                                <i class="ph-fill ph-star"></i>
+                                <i class="ph-fill ph-star"></i>
+                                <i class="ph-fill ph-star"></i>
+                                <i class="ph-fill ph-star"></i>
+                                <i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-xs text-stone-600">Your review helps our small family hospitality thrive.</p>
+                            <a href="https://airbnb.com" target="_blank" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                                <i class="ph-bold ph-arrow-square-out"></i> Leave a 5-Star Review
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-stone-200/70">
+                        <p class="text-[11px] text-stone-400">Left an item behind? Send a message to your host:</p>
+                        <a id="expired-host-whatsapp" href="#" target="_blank" class="mt-2 w-full py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                            <i class="ph-fill ph-whatsapp-logo text-emerald-400 text-base"></i> Contact Host Directly
+                        </a>
+                    </div>
+                </div>
+
+                <!-- In-App Floating Toast Notification -->
+                <div id="guest-toast" class="pointer-events-none opacity-0 transition-all duration-300 absolute top-14 left-1/2 -translate-x-1/2 z-50 bg-stone-900/95 text-white text-xs font-medium px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+                    <i class="ph-fill ph-check-circle text-emerald-400 text-base"></i>
+                    <span id="guest-toast-msg">Copied!</span>
+                </div>
+            </div>
+
+            <!-- VIEW 2: PERMANENT A4 WELCOME SIGN WITH DUAL QR CODES -->
+            <div id="print-view-wrapper" class="hidden flex-col items-center space-y-4 my-auto py-2">
+                <!-- Print Control Banner -->
+                <div id="print-action-bar" class="flex items-center gap-3 bg-slate-900 border border-slate-800 px-5 py-3 rounded-2xl shadow-xl">
+                    <i class="ph-fill ph-printer text-amber-400 text-xl"></i>
+                    <div class="text-xs">
+                        <p class="font-bold text-white">Permanent A4 Welcome Frame (No Reprinting Needed)</p>
+                        <p class="text-slate-400">Native camera Wi-Fi auto-connect + permanent guidebook QR.</p>
+                    </div>
+                    <button onclick="window.print()" class="ml-4 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition cursor-pointer">
+                        Print / Save PDF
+                    </button>
+                </div>
+
+                <!-- Printable Sheet Canvas -->
+                <div id="a4-printable-sheet" class="w-[595px] h-[842px] bg-[#FAF6F0] text-stone-900 rounded-xl shadow-2xl p-10 flex flex-col justify-between border border-stone-300 relative select-text">
+                    <div class="border-2 border-stone-800/20 rounded-3xl h-full w-full p-8 flex flex-col justify-between items-center text-center relative">
+                        
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-bold uppercase tracking-[0.25em] text-amber-700 block">Welcome To Your Sanctuary</span>
+                            <h1 id="print-prop-name" class="font-serif-editorial text-4xl font-bold text-stone-900 mt-1">Villa Solis Sanctuary</h1>
+                            <p id="print-prop-loc" class="text-xs text-stone-500 italic">Amalfi Coast, Italy</p>
+                        </div>
+
+                        <!-- DUAL QR CODE GRID: 1) CONNECT WIFI, 2) OPEN GUIDEBOOK -->
+                        <div class="w-full grid grid-cols-2 gap-5 my-2">
+                            <!-- QR 1: Camera Auto-Connect to Wi-Fi -->
+                            <div class="bg-white p-5 rounded-3xl shadow-sm border border-stone-200 flex flex-col items-center">
+                                <div class="w-36 h-36 flex items-center justify-center">
+                                    <img id="print-wifi-qr" src="" alt="Auto-Join Wi-Fi QR" class="w-36 h-36 object-contain">
+                                </div>
+                                <span class="mt-3 text-[11px] font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
+                                    <i class="ph-bold ph-wifi-high text-amber-700"></i> 1. Scan to Join Wi-Fi
+                                </span>
+                                <p class="text-[10px] text-stone-500 mt-0.5">Point camera to connect without typing password</p>
+                            </div>
+
+                            <!-- QR 2: Interactive Guidebook Web App -->
+                            <div class="bg-white p-5 rounded-3xl shadow-sm border border-stone-200 flex flex-col items-center">
+                                <div class="w-36 h-36 flex items-center justify-center">
+                                    <img id="print-guide-qr" src="" alt="Digital Guidebook QR" class="w-36 h-36 object-contain">
+                                </div>
+                                <span class="mt-3 text-[11px] font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
+                                    <i class="ph-bold ph-device-mobile text-amber-700"></i> 2. House Guidebook
+                                </span>
+                                <p class="text-[10px] text-stone-500 mt-0.5">Appliance guides, room tour & local gems</p>
+                            </div>
+                        </div>
+
+                        <!-- Key Info Box -->
+                        <div class="w-full grid grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-stone-200 text-left">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Wi-Fi Network</span>
+                                <p id="print-wifi-ssid" class="text-sm font-bold text-stone-800 mt-0.5">VillaSolis_5G</p>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mt-2">Wi-Fi Password</span>
+                                <p id="print-wifi-pass" class="text-sm font-mono font-bold text-amber-700 mt-0.5">limoncello2025</p>
+                            </div>
+                            <div class="border-l border-stone-200 pl-4">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Check-Out Time</span>
+                                <p id="print-checkout" class="text-sm font-bold text-stone-800 mt-0.5">11:00 AM</p>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mt-2">Host Support Contact</span>
+                                <p id="print-host-contact" class="text-xs font-semibold text-stone-800 mt-0.5">Elena & Marco • +39 089 812 3456</p>
+                            </div>
+                        </div>
+
+                        <div class="text-[11px] text-stone-400 tracking-wide">
+                            Have a wonderful stay! Please reach out anytime if you need assistance.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. APPLICATION STATE DEFINITION                                           -->
+    <!-- ========================================================================= -->
+    <script id="staycraft-state-script">
+        let state = {
+            isExportedGuestOnly: false,
+            simulationStage: 'active', // 'upcoming' | 'active' | 'expired'
+            theme: 'terracotta',
+            floorplanType: 'blueprint-villa',
+            customFloorplanImage: '',
+            propertyName: 'Villa Solis Sanctuary',
+            location: 'Positano • Amalfi Coast',
+            hostName: 'Elena & Marco',
+            heroImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1000&q=80',
+            checkInTime: '3:00 PM',
+            checkOutTime: '11:00 AM',
+            wifiName: 'VillaSolis_5G',
+            wifiPass: 'limoncello2025',
+            hostPhone: '+39 089 812 3456',
+            address: 'Via Cristoforo Colombo 42, 84017 Positano SA, Italy',
+            guidebookUrl: 'https://staycraft.app/villasolis',
+            
+            // Guest Bookings & Passes Engine
+            activePassId: 'pass_101',
+            passes: [
+                {
+                    id: 'pass_101',
+                    guestName: 'Sarah & James',
+                    checkIn: '2026-11-18T15:00',
+                    checkOut: '2026-11-21T11:00',
+                    doorCode: '#4829*',
+                    status: 'active'
+                },
+                {
+                    id: 'pass_102',
+                    guestName: 'Marco Rossi',
+                    checkIn: '2026-11-22T15:00',
+                    checkOut: '2026-11-26T11:00',
+                    doorCode: '#9142*',
+                    status: 'upcoming'
+                },
+                {
+                    id: 'pass_100',
+                    guestName: 'Chloe Bennett',
+                    checkIn: '2026-11-14T15:00',
+                    checkOut: '2026-11-17T11:00',
+                    doorCode: '#3018*',
+                    status: 'expired'
+                }
+            ],
+
+            activeHotspotId: 1,
+            hotspots: [
+                {
+                    id: 1,
+                    room: 'Kitchen',
+                    title: 'La Marzocco Espresso Bar',
+                    x: 26,
+                    y: 26,
+                    desc: 'Flip the main power toggle on the left side 10 minutes before brewing. Fresh local roast beans are in the ceramic canister next to the grinder.'
+                },
+                {
+                    id: 2,
+                    room: 'Living Lounge',
+                    title: 'Sonos Sound & Frame TV',
+                    x: 72,
+                    y: 35,
+                    desc: 'Use the sleek silver remote for Apple TV & Netflix. To stream music from your phone, connect to Wi-Fi and select "Villa Lounge" on Spotify or AirPlay.'
+                },
+                {
+                    id: 3,
+                    room: 'Master Suite',
+                    title: 'Daikin Climate & Blackout Blinds',
+                    x: 24,
+                    y: 72,
+                    desc: 'The wall controller adjusts A/C and heated floors. Press the "Moon" button by the bedside table to lower the automatic blackout shutters.'
+                },
+                {
+                    id: 4,
+                    room: 'Sun Terrace',
+                    title: 'Heated Plunge Pool & Sunset Lights',
+                    x: 76,
+                    y: 78,
+                    desc: 'Pool heating runs automatically between 9 AM and 9 PM. Flip the brass switch by the terrace glass door for warm ambient string lighting.'
+                }
+            ],
+            checkoutTasks: [
+                { id: 101, text: 'Place used towels in the laundry basket', done: false },
+                { id: 102, text: 'Load used dishes into the dishwasher & start Eco mode', done: false },
+                { id: 103, text: 'Turn off A/C climate units and terrace lights', done: false },
+                { id: 104, text: 'Close front door firmly — smart lock locks automatically', done: false }
+            ],
+            houseRules: [
+                { id: 201, title: 'Quiet Coastal Hours', desc: 'Please observe quiet hours between 10:30 PM and 8:00 AM out of respect for neighbors.' },
+                { id: 202, title: 'No Glass by the Plunge Pool', desc: 'Please use the crystal-style polycarbonate glasses from the bar cabinet when enjoying drinks outdoors.' },
+                { id: 203, title: 'Smoke-Free Living Indoors', desc: 'Smoking is strictly prohibited inside. Ashtrays are available on the terrace.' }
+            ],
+            localGems: [
+                {
+                    id: 301,
+                    category: 'Morning Espresso & Pastry',
+                    name: 'Collina Positano Bakery',
+                    distance: '4 min walk',
+                    note: 'Ask for the warm pistachio cornetto straight from the oven at 8:30 AM.',
+                    mapLink: 'https://maps.google.com/?q=Positano+Bakery'
+                },
+                {
+                    id: 302,
+                    category: 'Sunset Aperitivo & Views',
+                    name: 'Franco’s Bar Terrace',
+                    distance: '7 min walk',
+                    note: 'Arrive at 5:45 PM for front-row cliffside seats and signature Lemon Spritz.',
+                    mapLink: 'https://maps.google.com/?q=Francos+Bar+Positano'
+                },
+                {
+                    id: 303,
+                    category: 'Hidden Beach Cove',
+                    name: 'Fornillo Pebble Cove',
+                    distance: '10 min scenic walk',
+                    note: 'Much quieter than the main beach! Take the coastal stone path.',
+                    mapLink: 'https://maps.google.com/?q=Fornillo+Beach+Positano'
+                }
+            ],
+            translations: {
+                it: {
+                    location: 'Positano • Costiera Amalfitana',
+                    hotspots: {
+                        1: { room: 'Cucina', title: 'Macchina Espresso La Marzocco', desc: 'Attiva l\'interruttore sul lato sinistro 10 minuti prima di preparare il caffè. I chicchi tostati locali sono nel barattolo di ceramica accanto al macinino.' },
+                        2: { room: 'Salotto', title: 'Audio Sonos & Smart TV The Frame', desc: 'Usa il telecomando argentato per Apple TV e Netflix. Per ascoltare la musica dal telefono, connettiti al Wi-Fi e seleziona "Villa Lounge" su Spotify o AirPlay.' },
+                        3: { room: 'Camera Matrimoniale', title: 'Climatizzazione Daikin & Tapparelle', desc: 'Il termostato a parete regola l\'aria condizionata e il riscaldamento a pavimento. Premi il pulsante "Luna" sul comodino per abbassare le tapparelle oscuranti.' },
+                        4: { room: 'Terrazza Panoramica', title: 'Piscina Idromassaggio & Luci Tramonto', desc: 'Il riscaldamento della piscina funziona automaticamente dalle 9:00 alle 21:00. Usa l\'interruttore in ottone vicino alla porta a vetri per le luci calde della terrazza.' }
+                    },
+                    checkoutTasks: {
+                        101: 'Riponi gli asciugamani usati nel cesto della lavanderia',
+                        102: 'Carica i piatti usati nella lavastoviglie e avvia la modalità Eco',
+                        103: 'Spegni i climatizzatori e le luci della terrazza',
+                        104: 'Chiudi bene la porta d\'ingresso — la serratura smart si chiude automaticamente'
+                    },
+                    houseRules: {
+                        201: { title: 'Orari di Silenzio Costiero', desc: 'Si prega di rispettare la quiete del vicinato sulla terrazza tra le 22:30 e le 08:00.' },
+                        202: { title: 'Niente Vetro a Bordo Piscina', desc: 'Usa i bicchieri infrangibili in policarbonato situati nel mobile del bar quando sei all\'aperto.' },
+                        203: { title: 'Vietato Fumare all\'Interno', desc: 'È severamente vietato fumare all\'interno della villa. Posaceneri disponibili sul balcone inferiore.' }
+                    },
+                    localGems: {
+                        301: { category: 'Colazione & Pasticceria', note: 'Chiedi il cornetto al pistacchio caldo appena sfornato alle 8:30.' },
+                        302: { category: 'Aperitivo al Tramonto', note: 'Arriva alle 17:45 per i posti panoramici in prima fila e l\'Amalfi Lemon Spritz.' },
+                        303: { category: 'Cala Nascosta', note: 'Molto più tranquilla della spiaggia principale! Prendi il sentiero panoramico in pietra.' }
+                    }
+                },
+                es: {
+                    location: 'Positano • Costa Amalfitana',
+                    hotspots: {
+                        1: { room: 'Cocina', title: 'Cafetera Espresso La Marzocco', desc: 'Enciende el interruptor principal del lado izquierdo 10 minutos antes de preparar el café. El café en grano recién tostado está en el frasco de cerámica.' },
+                        2: { room: 'Salón Principal', title: 'Sonido Sonos y TV The Frame', desc: 'Usa el mando plateado para Apple TV y Netflix. Para escuchar música desde tu móvil, conéctate al Wi-Fi y elige "Villa Lounge" en Spotify.' },
+                        3: { room: 'Suite Principal', title: 'Clima Daikin y Persianas Automáticas', desc: 'El mando de pared controla el aire acondicionado y suelo radiante. Pulsa el botón "Luna" junto a la cama para bajar las persianas opacas.' },
+                        4: { room: 'Terraza Solárium', title: 'Piscina Climatizada y Luces', desc: 'La calefacción de la piscina funciona de 9:00 a 21:00. Enciende el interruptor de bronce junto a la cristalera para las luces cálidas.' }
+                    },
+                    checkoutTasks: {
+                        101: 'Deja las toallas usadas en la cesta de la colada',
+                        102: 'Coloca los platos en el lavavajillas y pulsa el modo Eco',
+                        103: 'Apaga los aires acondicionados y las luces de la terraza',
+                        104: 'Cierra bien la puerta principal — la cerradura inteligente se bloquea sola'
+                    },
+                    houseRules: {
+                        201: { title: 'Horas de Silencio', desc: 'Por favor respeta la tranquilidad del vecindario entre las 22:30 y las 8:00.' },
+                        202: { title: 'Sin Vasos de Cristal en la Piscina', desc: 'Utiliza las copas de policarbonato del mueble de bar para tus bebidas en el exterior.' },
+                        203: { title: 'Prohibido Fumar en el Interior', desc: 'Totalmente libre de humos en el interior. Hay ceniceros en la terraza inferior.' }
+                    },
+                    localGems: {
+                        301: { category: 'Café Matutino y Pasteles', note: 'Pide el croissant caliente relleno de pistacho recién horneado a las 8:30.' },
+                        302: { category: 'Aperitivo al Atardecer', note: 'Llega a las 17:45 para coger sitio en primera fila con vistas a los acantilados.' },
+                        303: { category: 'Cala Escondida', note: '¡Mucho más tranquila que la playa grande! Baja por el camino de piedra costero.' }
+                    }
+                },
+                fr: {
+                    location: 'Positano • Côte Amalfitaine',
+                    hotspots: {
+                        1: { room: 'Cuisine', title: 'Machine Espresso La Marzocco', desc: 'Basculez l\'interrupteur sur le côté gauche 10 minutes avant l\'extraction. Les grains de café frais sont dans le bocal en céramique.' },
+                        2: { room: 'Salon', title: 'Système Audio Sonos & TV The Frame', desc: 'Télécommande argentée pour Apple TV et Netflix. Pour écouter votre musique, connectez-vous au Wi-Fi et choisissez "Villa Lounge" sur Spotify.' },
+                        3: { room: 'Chambre Parentale', title: 'Climatisation Daikin & Stores Motorisés', desc: 'Le thermostat mural contrôle la clim et le sol chauffant. Appuyez sur le bouton "Lune" près du lit pour fermer les volets occultants.' },
+                        4: { room: 'Terrasse Panoramique', title: 'Bassin Chauffé & Éclairage Soirée', desc: 'Le chauffage du bassin est actif de 9h à 21h. Actionnez l\'interrupteur en laiton près de la baie vitrée pour l\'éclairage d\'ambiance.' }
+                    },
+                    checkoutTasks: {
+                        101: 'Déposez les serviettes utilisées dans le panier à linge',
+                        102: 'Placez la vaisselle dans le lave-vaisselle et lancez le cycle Éco',
+                        103: 'Éteignez la climatisation et les lumières extérieures',
+                        104: 'Fermez bien la porte d\'entrée — le verrou intelligent s\'enclenche automatiquement'
+                    },
+                    houseRules: {
+                        201: { title: 'Heures Calmes', desc: 'Merci de respecter la tranquillité du voisinage sur la terrasse entre 22h30 et 8h00.' },
+                        202: { title: 'Pas de Verre autour du Bassin', desc: 'Merci d\'utiliser les verres incassables en polycarbonate rangés dans le buffet.' },
+                        203: { title: 'Espace Intérieur Non-Fumeur', desc: 'Interdiction stricte de fumer dans la villa. Cendriers à disposition sur la terrasse.' }
+                    },
+                    localGems: {
+                        301: { category: 'Café du Matin & Pâtisseries', note: 'Demandez le cornetto tiède à la pistache tout juste sorti du four à 8h30.' },
+                        302: { category: 'Apéritif Coucher de Soleil', note: 'Arrivez à 17h45 pour avoir une table en bord de falaise et goûter leur Lemon Spritz.' },
+                        303: { category: 'Crique Secrète', note: 'Bien plus paisible que la plage principale ! Empruntez le sentier côtier en pierre.' }
+                    }
+                },
+                de: {
+                    location: 'Positano • Amalfiküste',
+                    hotspots: {
+                        1: { room: 'Küche', title: 'La Marzocco Siebträgermaschine', desc: 'Hauptschalter an der linken Seite 10 Minuten vor dem Brühen einschalten. Frische Kaffeebohnen im Keramikbehälter neben der Mühle.' },
+                        2: { room: 'Wohnbereich', title: 'Sonos Sound & The Frame TV', desc: 'Silberne Fernbedienung für Apple TV & Netflix. Eigene Musik per WLAN über Spotify Connect "Villa Lounge" abspielen.' },
+                        3: { room: 'Hauptschlafzimmer', title: 'Daikin Klimaanlage & Rollos', desc: 'Wandthermostat regelt Klimaanlage und Fußbodenheizung. Taste "Mond" am Nachttisch senkt die Verdunkelungsrollos.' },
+                        4: { room: 'Sonnenterrasse', title: 'Beheiztes Tauchbecken & Lichter', desc: 'Poolheizung läuft automatisch von 9:00 bis 21:00 Uhr. Messingschalter an der Glastür für stimmungsvolle Terrassenbeleuchtung.' }
+                    },
+                    checkoutTasks: {
+                        101: 'Gebrauchte Handtücher in den Wäschekorb legen',
+                        102: 'Geschirr in den Geschirrspüler einräumen und Eco-Taste drücken',
+                        103: 'Klimaanlagen und Terrassenbeleuchtung ausschalten',
+                        104: 'Haupteingangstür fest zuziehen — Smart Lock verriegelt automatisch'
+                    },
+                    houseRules: {
+                        201: { title: 'Ruhezeiten an der Küste', desc: 'Bitte respektieren Sie zwischen 22:30 und 08:00 Uhr die Nachbarschaftsruhe auf der Terrasse.' },
+                        202: { title: 'Kein Glas am Pool', desc: 'Bitte verwenden Sie die unzerbrechlichen Gläser aus dem Barschrank für Getränke im Freien.' },
+                        203: { title: 'Rauchverbot im Innenbereich', desc: 'Das Rauchen ist im Haus strengstens untersagt. Aschenbecher stehen auf dem unteren Balkon.' }
+                    },
+                    localGems: {
+                        301: { category: 'Morgen-Espresso & Gebäck', note: 'Fragen Sie um 8:30 Uhr nach dem warmen Pistazien-Cornetto frisch aus dem Ofen.' },
+                        302: { category: 'Aperitivo zum Sonnenuntergang', note: 'Kommen Sie um 17:45 Uhr für Sitzplätze in erster Reihe und den Amalfi Lemon Spritz.' },
+                        303: { category: 'Versteckte Kieselbucht', note: 'Viel ruhiger als der Hauptstrand! Nehmen Sie den malerischen Fußweg an der Küste.' }
+                    }
+                }
+            }
+        };
+
+        if (!state.isExportedGuestOnly) {
+            try {
+                const saved = localStorage.getItem('staycraft_saved_state_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = Object.assign({}, state, parsed);
+                }
+            } catch (e) {}
+        }
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- 5. APPLICATION LOGIC & GUEST SECURITY ENGINE                              -->
+    <!-- ========================================================================= -->
+    <script id="staycraft-app-script">
+        const i18n = {
+            en: {
+                hostedBy: 'Hosted by',
+                checkin: 'Check-In',
+                checkout: 'Check-Out',
+                doorcode: 'Smart Lock',
+                tapToShow: 'Tap to Show',
+                wifiTitle: 'Instant Wi-Fi',
+                passLabel: 'Pass:',
+                copyBtn: 'Copy',
+                tourCardTitle: 'Interactive Floorplan',
+                tourCardSub: 'Visual guides for A/C, Coffee, and TV remotes',
+                addressLabel: 'Property Address',
+                needHelp: 'Host Direct Line',
+                messageHost: 'WhatsApp',
+                fpHeading: 'Interactive Floorplan',
+                fpSubheading: 'Tap any pulsing pin to view appliance instructions',
+                allGuides: 'All Appliance Guides',
+                checkoutHeading: 'Departure Checklist',
+                checkoutSub: 'Tap each task as you prepare for departure',
+                progressLabel: 'Check-Out Progress',
+                completedWord: 'Completed',
+                rulesHeading: 'House Golden Rules',
+                localHeading: 'Host\'s Local Favorites',
+                localSub: 'Curated spots tested and recommended by your host',
+                openMaps: 'Open Maps',
+                pinsWord: 'Pins',
+                navHome: 'Welcome',
+                navMap: 'Floorplan',
+                navRules: 'Check-Out',
+                navLocal: 'Local Gems',
+                welcomeBanner: 'Welcome to your sanctuary!',
+                arrivalSub: 'Wi-Fi & Door Lock info ready below.',
+                morningBanner: 'Good Morning! Check-Out is at',
+                morningSub: 'Tap Check-Out tab to complete your departure checklist.',
+                nightBanner: 'Quiet Hours in Effect (10:30 PM - 8:00 AM)',
+                nightSub: 'Relax peacefully. Urgent host contact below.',
+                translateChip: 'Translate'
+            },
+            it: {
+                hostedBy: 'Ospitato da',
+                checkin: 'Arrivo',
+                checkout: 'Partenza',
+                doorcode: 'Smart Lock',
+                tapToShow: 'Mostra Codice',
+                wifiTitle: 'Wi-Fi della Casa',
+                passLabel: 'Pass:',
+                copyBtn: 'Copia',
+                tourCardTitle: 'Mappa Interattiva',
+                tourCardSub: 'Guide per A/C, Caffè e Telecomandi',
+                addressLabel: 'Indirizzo Struttura',
+                needHelp: 'Supporto Host',
+                messageHost: 'WhatsApp',
+                fpHeading: 'Planimetria Interattiva',
+                fpSubheading: 'Tocca i numeri per le istruzioni degli elettrodomestici',
+                allGuides: 'Tutte le Istruzioni',
+                checkoutHeading: 'Checklist di Partenza',
+                checkoutSub: 'Spunta ogni punto prima di partire',
+                progressLabel: 'Stato Check-Out',
+                completedWord: 'Completati',
+                rulesHeading: 'Regole della Casa',
+                localHeading: 'Posti Consigliati',
+                localSub: 'I nostri ristoranti e luoghi preferiti',
+                openMaps: 'Mappe',
+                pinsWord: 'Punti',
+                navHome: 'Benvenuto',
+                navMap: 'Mappa',
+                navRules: 'Partenza',
+                navLocal: 'Consigli',
+                welcomeBanner: 'Benvenuto nella tua casa vacanze!',
+                arrivalSub: 'Wi-Fi e Codice Porta pronti qui sotto.',
+                morningBanner: 'Buongiorno! La partenza è prevista alle',
+                morningSub: 'Tocca Partenza per completare la checklist di check-out.',
+                nightBanner: 'Orari di Silenzio (22:30 - 08:00)',
+                nightSub: 'Buon riposo. Contatto urgente dell\'host qui sotto.',
+                translateChip: 'Traduci'
+            },
+            es: {
+                hostedBy: 'Anfitrión:',
+                checkin: 'Llegada',
+                checkout: 'Salida',
+                doorcode: 'Cerradura',
+                tapToShow: 'Ver Código',
+                wifiTitle: 'Wi-Fi Rápido',
+                passLabel: 'Clave:',
+                copyBtn: 'Copiar',
+                tourCardTitle: 'Plano Interactivo',
+                tourCardSub: 'Guías de uso para A/C, Café y TV',
+                addressLabel: 'Dirección',
+                needHelp: 'Contacto Anfitrión',
+                messageHost: 'WhatsApp',
+                fpHeading: 'Plano Interactivo',
+                fpSubheading: 'Toca cualquier pin para ver instrucciones',
+                allGuides: 'Todas las Guías',
+                checkoutHeading: 'Lista de Salida',
+                checkoutSub: 'Marca cada tarea antes de salir',
+                progressLabel: 'Progreso de Salida',
+                completedWord: 'Completados',
+                rulesHeading: 'Normas de la Casa',
+                localHeading: 'Lugares Favoritos',
+                localSub: 'Recomendaciones seleccionadas para ti',
+                openMaps: 'Ver Mapa',
+                pinsWord: 'Puntos',
+                navHome: 'Inicio',
+                navMap: 'Plano',
+                navRules: 'Salida',
+                navLocal: 'Guía',
+                welcomeBanner: '¡Bienvenido a tu estancia!',
+                arrivalSub: 'Wi-Fi y código de puerta disponibles abajo.',
+                morningBanner: '¡Buenos días! La salida es a las',
+                morningSub: 'Toca la pestaña Salida para completar la lista de tareas.',
+                nightBanner: 'Horas de Silencio (22:30 - 08:00)',
+                nightSub: 'Descansa plácidamente. Contacto urgente abajo.',
+                translateChip: 'Traducir'
+            },
+            fr: {
+                hostedBy: 'Hôte :',
+                checkin: 'Arrivée',
+                checkout: 'Départ',
+                doorcode: 'Serrure',
+                tapToShow: 'Voir Code',
+                wifiTitle: 'Wi-Fi Rapide',
+                passLabel: 'Clé :',
+                copyBtn: 'Copier',
+                tourCardTitle: 'Plan de la Villa',
+                tourCardSub: 'Guides pratiques pour Clim, Café et TV',
+                addressLabel: 'Adresse de la Propriété',
+                needHelp: 'Assistance Hôte',
+                messageHost: 'WhatsApp',
+                fpHeading: 'Plan Interactif',
+                fpSubheading: 'Touchez un repère pour voir les instructions',
+                allGuides: 'Tous les Guides',
+                checkoutHeading: 'Checklist de Départ',
+                checkoutSub: 'Cochez chaque étape avant votre départ',
+                progressLabel: 'Progression',
+                completedWord: 'Terminés',
+                rulesHeading: 'Règles de la Maison',
+                localHeading: 'Nos Bonnes Adresses',
+                localSub: 'Nos coups de cœur locaux',
+                openMaps: 'Carte',
+                pinsWord: 'Repères',
+                navHome: 'Accueil',
+                navMap: 'Plan',
+                navRules: 'Départ',
+                navLocal: 'Adresses',
+                welcomeBanner: 'Bienvenue dans votre villa !',
+                arrivalSub: 'Wi-Fi et Code d\'accès prêts ci-dessous.',
+                morningBanner: 'Bonjour ! Le départ est prévu à',
+                morningSub: 'Consultez la checklist de départ avant de quitter les lieux.',
+                nightBanner: 'Heures de Silence (22h30 - 08h00)',
+                nightSub: 'Reposez-vous paisiblement. Contact d\'urgence ci-dessous.',
+                translateChip: 'Traduire'
+            },
+            de: {
+                hostedBy: 'Gastgeber:',
+                checkin: 'Check-in',
+                checkout: 'Check-out',
+                doorcode: 'Türschloss',
+                tapToShow: 'Code anzeigen',
+                wifiTitle: 'Schnelles WLAN',
+                passLabel: 'Pass:',
+                copyBtn: 'Kopieren',
+                tourCardTitle: 'Interaktiver Grundriss',
+                tourCardSub: 'Anleitungen für Klima, Kaffee und TV',
+                addressLabel: 'Adresse der Unterkunft',
+                needHelp: 'Gastgeber Kontakt',
+                messageHost: 'WhatsApp',
+                fpHeading: 'Interaktiver Grundriss',
+                fpSubheading: 'Tippe auf eine Markierung für die Anleitung',
+                allGuides: 'Alle Anleitungen',
+                checkoutHeading: 'Abreise-Checkliste',
+                checkoutSub: 'Vor der Abreise abhaken',
+                progressLabel: 'Fortschritt',
+                completedWord: 'Erledigt',
+                rulesHeading: 'Hausregeln',
+                localHeading: 'Lokale Empfehlungen',
+                localSub: 'Unsere persönlichen Favoriten',
+                openMaps: 'Karte öffnen',
+                pinsWord: 'Punkte',
+                navHome: 'Start',
+                navMap: 'Grundriss',
+                navRules: 'Abreise',
+                navLocal: 'Tipps',
+                welcomeBanner: 'Willkommen in Ihrem Urlaubsdomizil!',
+                arrivalSub: 'WLAN & Tür-Code stehen unten bereit.',
+                morningBanner: 'Guten Morgen! Check-out ist um',
+                morningSub: 'Tippe auf Abreise, um die Checkliste auszufüllen.',
+                nightBanner: 'Ruhezeiten (22:30 - 08:00 Uhr)',
+                nightSub: 'Gute Erholung. Notfallkontakt unten angegeben.',
+                translateChip: 'Übersetzen'
+            }
+        };
+
+        const themePalettes = {
+            terracotta: { primary: '#C86D51', bg: '#FAF6F0', bannerBg: '#FFF7ED', bannerText: '#9A3412', bannerBorder: '#FDBA74' },
+            sage:       { primary: '#3F6252', bg: '#F4F7F4', bannerBg: '#F0FDF4', bannerText: '#166534', bannerBorder: '#86EFAC' },
+            coastal:    { primary: '#1E4E68', bg: '#F2F7FA', bannerBg: '#F0F9FF', bannerText: '#075985', bannerBorder: '#7DD3FC' },
+            noir:       { primary: '#27272A', bg: '#F4F4F5', bannerBg: '#FAFAFA', bannerText: '#18181B', bannerBorder: '#D4D4D8' }
+        };
+
+        let currentGuestLang = 'en';
+        let currentGuestTab = 'home';
+        let currentEditorTab = 'general';
+        let keycodeRevealed = false;
+
+        const blueprintSVGs = {
+            'blueprint-villa': `
+                <svg viewBox="0 0 400 300" class="w-full h-full select-none pointer-events-none">
+                    <defs>
+                        <pattern id="arch-grid-villa" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E5DEC9" stroke-width="0.7"/>
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#arch-grid-villa)" />
+                    <rect x="24" y="20" width="352" height="260" rx="8" fill="#FAF6F0" stroke="#44403C" stroke-width="4"/>
+                    <rect x="24" y="20" width="150" height="125" fill="#F5EFE6" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="36" y="40" fill="#78716C" font-size="8.5" font-weight="700" letter-spacing="1">KITCHEN & ESPRESSO</text>
+                    <rect x="30" y="52" width="24" height="80" rx="3" fill="#E7E0D3" stroke="#A8A29E" stroke-width="1.5"/>
+                    <circle cx="42" cy="75" r="6" fill="none" stroke="#78716C" stroke-width="1.2"/>
+                    <rect x="90" y="55" width="55" height="32" rx="4" fill="#E7E0D3" stroke="#A8A29E" stroke-width="1.5"/>
+                    <rect x="24" y="145" width="150" height="135" fill="#FAF6F0" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="36" y="266" fill="#78716C" font-size="8.5" font-weight="700" letter-spacing="1">MASTER SUITE</text>
+                    <rect x="40" y="175" width="76" height="62" rx="5" fill="#EFECE6" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="45" y="182" width="18" height="20" rx="3" fill="#FAF6F0" stroke="#78716C" stroke-width="1.2"/>
+                    <rect x="45" y="208" width="18" height="20" rx="3" fill="#FAF6F0" stroke="#78716C" stroke-width="1.2"/>
+                    <text x="195" y="40" fill="#78716C" font-size="8.5" font-weight="700" letter-spacing="1">LIVING & FRAME TV</text>
+                    <path d="M 270 65 H 350 V 145 H 322 V 90 H 270 Z" fill="#E7E0D3" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="174" y="195" width="202" height="85" fill="#E6F0EC" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="188" y="266" fill="#3F6252" font-size="8.5" font-weight="700" letter-spacing="1">SUN TERRACE & POOL</text>
+                    <rect x="265" y="210" width="95" height="45" rx="10" fill="#B8D8D8" stroke="#52796F" stroke-width="1.5"/>
+                </svg>
+            `,
+            'blueprint-cabin': `
+                <svg viewBox="0 0 400 300" class="w-full h-full select-none pointer-events-none">
+                    <defs>
+                        <pattern id="arch-grid-cabin" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E5DEC9" stroke-width="0.7"/>
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#arch-grid-cabin)" />
+                    <rect x="20" y="20" width="360" height="260" rx="8" fill="#FAF6F0" stroke="#44403C" stroke-width="4"/>
+                    <rect x="20" y="20" width="145" height="125" fill="#FAF6F0" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="32" y="38" fill="#78716C" font-size="8.5" font-weight="700">SUITE 1 (KING)</text>
+                    <rect x="42" y="55" width="75" height="65" rx="4" fill="#EFECE6" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="20" y="145" width="145" height="135" fill="#FAF6F0" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="32" y="265" fill="#78716C" font-size="8.5" font-weight="700">SUITE 2 (TWINS)</text>
+                    <rect x="38" y="165" width="45" height="65" rx="4" fill="#EFECE6" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="95" y="165" width="45" height="65" rx="4" fill="#EFECE6" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="165" y="20" width="215" height="180" fill="#F5EFE6" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="180" y="38" fill="#78716C" font-size="8.5" font-weight="700">GREAT ROOM & FIREPLACE</text>
+                    <rect x="215" y="70" width="115" height="65" rx="6" fill="#E7E0D3" stroke="#78716C" stroke-width="1.5"/>
+                    <rect x="165" y="200" width="215" height="80" fill="#E6F0EC" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="180" y="265" fill="#3F6252" font-size="8.5" font-weight="700">CEDAR DECK & HOT TUB</text>
+                    <circle cx="330" cy="240" r="24" fill="#B8D8D8" stroke="#52796F" stroke-width="2"/>
+                </svg>
+            `,
+            'blueprint-loft': `
+                <svg viewBox="0 0 400 300" class="w-full h-full select-none pointer-events-none">
+                    <defs>
+                        <pattern id="arch-grid-loft" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E5DEC9" stroke-width="0.7"/>
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#arch-grid-loft)" />
+                    <rect x="24" y="20" width="352" height="260" rx="8" fill="#FAF6F0" stroke="#44403C" stroke-width="4"/>
+                    <rect x="24" y="20" width="115" height="110" fill="#EFECE6" stroke="#44403C" stroke-width="2.5"/>
+                    <text x="34" y="38" fill="#78716C" font-size="8.5" font-weight="700">BATH & LAUNDRY</text>
+                    <rect x="34" y="55" width="42" height="26" rx="6" fill="#E6F0EC" stroke="#78716C" stroke-width="1.3"/>
+                    <rect x="139" y="20" width="237" height="95" fill="#F5EFE6" stroke="#44403C" stroke-width="2"/>
+                    <text x="155" y="38" fill="#78716C" font-size="8.5" font-weight="700">OPEN KITCHEN & ISLAND</text>
+                    <rect x="175" y="60" width="140" height="28" rx="4" fill="#E7E0D3" stroke="#78716C" stroke-width="1.5"/>
+                    <text x="36" y="264" fill="#78716C" font-size="8.5" font-weight="700">KING SLEEPING ALCOVE</text>
+                    <rect x="34" y="160" width="90" height="78" rx="6" fill="#E7E0D3" stroke="#78716C" stroke-width="1.5"/>
+                    <text x="200" y="264" fill="#78716C" font-size="8.5" font-weight="700">LOUNGE & WORKSPACE</text>
+                    <rect x="210" y="155" width="115" height="45" rx="6" fill="#E7E0D3" stroke="#78716C" stroke-width="1.5"/>
+                </svg>
+            `
+        };
+
+        // --- LOCALIZATION RESOLVERS ---
+        function getLocalizedHotspot(spot, lang) {
+            if (lang === 'en' || !state.translations || !state.translations[lang] || !state.translations[lang].hotspots) {
+                return spot;
+            }
+            const t = state.translations[lang].hotspots[spot.id];
+            if (!t) return spot;
+            return { ...spot, room: t.room || spot.room, title: t.title || spot.title, desc: t.desc || spot.desc };
+        }
+
+        function getLocalizedTaskText(task, lang) {
+            if (lang === 'en' || !state.translations || !state.translations[lang] || !state.translations[lang].checkoutTasks) {
+                return task.text;
+            }
+            return state.translations[lang].checkoutTasks[task.id] || task.text;
+        }
+
+        function getLocalizedRule(rule, lang) {
+            if (lang === 'en' || !state.translations || !state.translations[lang] || !state.translations[lang].houseRules) {
+                return rule;
+            }
+            const t = state.translations[lang].houseRules[rule.id];
+            if (!t) return rule;
+            return { ...rule, title: t.title || rule.title, desc: t.desc || rule.desc };
+        }
+
+        function getLocalizedGem(gem, lang) {
+            if (lang === 'en' || !state.translations || !state.translations[lang] || !state.translations[lang].localGems) {
+                return gem;
+            }
+            const t = state.translations[lang].localGems[gem.id];
+            if (!t) return gem;
+            return { ...gem, category: t.category || gem.category, note: t.note || gem.note };
+        }
+
+        function getLocalizedLocation(lang) {
+            if (lang === 'en' || !state.translations || !state.translations[lang] || !state.translations[lang].location) {
+                return state.location;
+            }
+            return state.translations[lang].location;
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (state.isExportedGuestOnly) {
+                const header = document.getElementById('studio-header');
+                if (header) header.remove();
+                const tester = document.getElementById('time-travel-tester');
+                if (tester) tester.remove();
+                const sidebar = document.getElementById('builder-sidebar');
+                if (sidebar) sidebar.remove();
+                const printWrap = document.getElementById('print-view-wrapper');
+                if (printWrap) printWrap.remove();
+            } else {
+                initDefaultBookingDates();
+                populateEditorInputs();
+                renderEditorLists();
+                renderPassesList();
+                renderPrintableSign();
+            }
+            applyTheme();
+            updateSimulationStageUI();
+            renderGuestApp();
+            updateContextBanner();
+
+            setInterval(updateContextBanner, 60000);
+        });
+
+        function initDefaultBookingDates() {
+            const inInput = document.getElementById('inp-pass-checkin');
+            const outInput = document.getElementById('inp-pass-checkout');
+            if (inInput && !inInput.value) {
+                const now = new Date();
+                const nextDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+                inInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                outInput.value = new Date(nextDays.getTime() - nextDays.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            }
+        }
+
+        // --- POPULATE INPUTS ---
+        function populateEditorInputs() {
+            if (state.isExportedGuestOnly) return;
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val || '';
+            };
+            setVal('inp-prop-name', state.propertyName);
+            setVal('inp-prop-loc', state.location);
+            setVal('inp-host-name', state.hostName);
+            setVal('inp-hero-img', state.heroImage);
+            setVal('inp-checkin', state.checkInTime);
+            setVal('inp-checkout', state.checkOutTime);
+            setVal('inp-wifi-ssid', state.wifiName);
+            setVal('inp-wifi-pass', state.wifiPass);
+            setVal('inp-host-phone', state.hostPhone);
+            setVal('inp-address', state.address);
+            setVal('inp-guidebook-url', state.guidebookUrl);
+            updateFloorplanSelectorUI();
+        }
+
+        function updateField(key, value) {
+            state[key] = value;
+            saveStateToLocalStorage();
+            renderGuestApp();
+            renderPrintableSign();
+        }
+
+        function saveStateToLocalStorage() {
+            if (state.isExportedGuestOnly) return;
+            try {
+                localStorage.setItem('staycraft_saved_state_v2', JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        // --- GUEST PASSES & EXPIRED ENGINE ---
+        function getActivePass() {
+            return state.passes.find(p => p.id === state.activePassId) || state.passes[0];
+        }
+
+        function createNewGuestPass() {
+            const guestName = document.getElementById('inp-pass-guest').value.trim() || 'Valued Guest';
+            const checkIn = document.getElementById('inp-pass-checkin').value;
+            const checkOut = document.getElementById('inp-pass-checkout').value;
+            const doorCode = document.getElementById('inp-pass-doorcode').value.trim() || '#4829*';
+            const newId = 'pass_' + Math.floor(1000 + Math.random() * 9000);
+
+            const newPass = {
+                id: newId,
+                guestName,
+                checkIn,
+                checkOut,
+                doorCode,
+                status: 'active'
+            };
+
+            state.passes.unshift(newPass);
+            state.activePassId = newId;
+            state.simulationStage = 'active';
+
+            saveStateToLocalStorage();
+            renderPassesList();
+            updateSimulationStageUI();
+            renderGuestApp();
+            showGuestToast(`Pass created for ${guestName}!`);
+        }
+
+        function renderPassesList() {
+            const activePass = getActivePass();
+            if (!activePass) return;
+
+            // Update Current Pass Details Box
+            const dispGuest = document.getElementById('pass-display-guest');
+            const dispDates = document.getElementById('pass-display-dates');
+            const dispUrl = document.getElementById('pass-display-url');
+            const dispMsg = document.getElementById('pass-airbnb-msg');
+            const statusPill = document.getElementById('pass-status-pill');
+
+            if (dispGuest) dispGuest.textContent = activePass.guestName;
+            if (dispDates) {
+                const inStr = activePass.checkIn ? new Date(activePass.checkIn).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '3:00 PM';
+                const outStr = activePass.checkOut ? new Date(activePass.checkOut).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '11:00 AM';
+                dispDates.textContent = `${inStr} → ${outStr}`;
+            }
+
+            const cleanSlug = (state.propertyName || 'villasolis').toLowerCase().replace(/[^a-z0-9]+/g, '');
+            const passUrl = `https://staycraft.app/${cleanSlug}?pass=${activePass.id}`;
+            if (dispUrl) dispUrl.textContent = passUrl;
+
+            if (dispMsg) {
+                dispMsg.textContent = `"Hi ${activePass.guestName}! Welcome to ${state.propertyName}. Here is your personal digital guidebook & arrival key: ${passUrl}. Your smart door lock code will activate at check-in time and expire at checkout. Have a wonderful stay! — ${state.hostName}"`;
+            }
+
+            if (statusPill) {
+                if (state.simulationStage === 'upcoming') {
+                    statusPill.textContent = 'Upcoming Stay (Door Locked)';
+                    statusPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                } else if (state.simulationStage === 'expired') {
+                    statusPill.textContent = 'Stay Expired (Wiped)';
+                    statusPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                } else {
+                    statusPill.textContent = 'Active Stay (Unlocked)';
+                    statusPill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                }
+            }
+
+            // Render Passes History
+            const listEl = document.getElementById('passes-history-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            state.passes.forEach(pass => {
+                const isSelected = pass.id === state.activePassId;
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
+                    isSelected ? 'bg-slate-800/95 border-emerald-500 shadow' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                }`;
+                card.onclick = () => {
+                    state.activePassId = pass.id;
+                    saveStateToLocalStorage();
+                    renderPassesList();
+                    renderGuestApp();
+                };
+
+                card.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-white truncate">${pass.guestName}</span>
+                            <span class="font-mono text-[10px] text-amber-400 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${pass.doorCode}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">ID: ${pass.id}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${isSelected ? '<span class="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">Selected</span>' : ''}
+                        <button onclick="event.stopPropagation(); deleteGuestPass('${pass.id}')" title="Delete pass" class="w-6 h-6 rounded-lg text-slate-500 hover:text-rose-400 flex items-center justify-center">
+                            <i class="ph-bold ph-trash text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function deleteGuestPass(passId) {
+            if (state.passes.length <= 1) {
+                showGuestToast('Keep at least one active pass template');
+                return;
+            }
+            state.passes = state.passes.filter(p => p.id !== passId);
+            if (state.activePassId === passId) {
+                state.activePassId = state.passes[0].id;
+            }
+            saveStateToLocalStorage();
+            renderPassesList();
+            renderGuestApp();
+        }
+
+        function copyGeneratedPassUrl() {
+            const dispUrl = document.getElementById('pass-display-url');
+            if (dispUrl) copyTextToClipboard(dispUrl.textContent, 'Pass Link copied!');
+        }
+
+        function copyAirbnbMessageTemplate() {
+            const activePass = getActivePass();
+            const cleanSlug = (state.propertyName || 'villasolis').toLowerCase().replace(/[^a-z0-9]+/g, '');
+            const passUrl = `https://staycraft.app/${cleanSlug}?pass=${activePass.id}`;
+            const msg = `Hi ${activePass.guestName}! Welcome to ${state.propertyName}. Here is your personal digital guidebook & arrival key: ${passUrl}\n\nNote: For your security, your smart door lock code will automatically activate on your arrival date and expire at checkout on ${state.checkOutTime}. Have a wonderful stay!\n— ${state.hostName}`;
+            copyTextToClipboard(msg, 'Airbnb chat message copied to clipboard!');
+        }
+
+        // --- TIME-TRAVEL SIMULATION STAGES ---
+        function setStaySimulationStage(stage) {
+            state.simulationStage = stage;
+            updateSimulationStageUI();
+            renderGuestApp();
+            renderPassesList();
+            saveStateToLocalStorage();
+            const names = { upcoming: 'Pre-Arrival (Locked Door)', active: 'Active Stay (Full Access)', expired: 'Checkout (Auto-Expired & Wiped)' };
+            showGuestToast(`Simulation Mode: ${names[stage]}`);
+        }
+
+        function updateSimulationStageUI() {
+            ['upcoming', 'active', 'expired'].forEach(st => {
+                const btn = document.getElementById('stage-btn-' + st);
+                if (btn) {
+                    if (st === state.simulationStage) {
+                        btn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition flex items-center gap-1';
+                    } else {
+                        btn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1';
+                    }
+                }
+            });
+        }
+
+        // --- RENDER GUEST APP ACCORDING TO STAGE ---
+        function renderGuestApp() {
+            const upcomingView = document.getElementById('guest-state-upcoming');
+            const activeView = document.getElementById('guest-state-active');
+            const expiredView = document.getElementById('guest-state-expired');
+            const activePass = getActivePass();
+
+            if (!upcomingView || !activeView || !expiredView) return;
+
+            // 1. STAGE ROUTING
+            if (state.simulationStage === 'upcoming') {
+                upcomingView.classList.remove('hidden');
+                upcomingView.classList.add('flex');
+                activeView.classList.add('hidden');
+                activeView.classList.remove('flex');
+                expiredView.classList.add('hidden');
+                expiredView.classList.remove('flex');
+
+                document.getElementById('upcoming-prop-name').textContent = state.propertyName;
+                document.getElementById('upcoming-guest-greeting').textContent = `Welcome, ${activePass.guestName}!`;
+                document.getElementById('upcoming-countdown-text').textContent = `Check-In is at ${state.checkInTime}`;
+                document.getElementById('upcoming-address').textContent = state.address;
+                const cleanPhone = (state.hostPhone || '').replace(/[^0-9]/g, '');
+                document.getElementById('upcoming-host-whatsapp').href = `https://wa.me/${cleanPhone}`;
+                return;
+            }
+
+            if (state.simulationStage === 'expired') {
+                upcomingView.classList.add('hidden');
+                upcomingView.classList.remove('flex');
+                activeView.classList.add('hidden');
+                activeView.classList.remove('flex');
+                expiredView.classList.remove('hidden');
+                expiredView.classList.add('flex');
+
+                document.getElementById('expired-guest-farewell').textContent = `Thank you for visiting ${state.propertyName}, ${activePass.guestName}!`;
+                const cleanPhone = (state.hostPhone || '').replace(/[^0-9]/g, '');
+                document.getElementById('expired-host-whatsapp').href = `https://wa.me/${cleanPhone}`;
+                return;
+            }
+
+            // STAGE 2: ACTIVE STAY
+            upcomingView.classList.add('hidden');
+            upcomingView.classList.remove('flex');
+            expiredView.classList.add('hidden');
+            expiredView.classList.remove('flex');
+            activeView.classList.remove('hidden');
+            activeView.classList.add('flex');
+
+            const t = i18n[currentGuestLang] || i18n.en;
+            const setTxt = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val || '';
+            };
+
+            setTxt('i18n-hosted-by', t.hostedBy);
+            setTxt('i18n-checkin', t.checkin);
+            setTxt('i18n-checkout', t.checkout);
+            setTxt('i18n-doorcode', t.doorcode);
+            setTxt('i18n-wifi-title', t.wifiTitle);
+            setTxt('i18n-pass-label', t.passLabel);
+            setTxt('i18n-copy-btn', t.copyBtn);
+            setTxt('i18n-copy-addr', t.copyBtn);
+            setTxt('i18n-tour-card-title', t.tourCardTitle);
+            setTxt('i18n-tour-card-sub', t.tourCardSub);
+            setTxt('i18n-address-label', t.addressLabel);
+            setTxt('i18n-need-help', t.needHelp);
+            setTxt('i18n-message-host', t.messageHost);
+            setTxt('i18n-fp-heading', t.fpHeading);
+            setTxt('i18n-fp-subheading', t.fpSubheading);
+            setTxt('i18n-all-guides', t.allGuides);
+            setTxt('i18n-checkout-heading', t.checkoutHeading);
+            setTxt('i18n-checkout-sub', t.checkoutSub);
+            setTxt('i18n-progress-label', t.progressLabel);
+            setTxt('i18n-rules-heading', t.rulesHeading);
+            setTxt('i18n-local-heading', t.localHeading);
+            setTxt('i18n-local-sub', t.localSub);
+            setTxt('i18n-nav-home', t.navHome);
+            setTxt('i18n-nav-map', t.navMap);
+            setTxt('i18n-nav-rules', t.navRules);
+            setTxt('i18n-nav-local', t.navLocal);
+
+            const heroImg = document.getElementById('view-hero-img');
+            if (heroImg) heroImg.src = state.heroImage;
+
+            setTxt('view-prop-name', state.propertyName);
+            setTxt('view-prop-loc', getLocalizedLocation(currentGuestLang));
+            setTxt('view-host-name', state.hostName);
+            setTxt('view-checkin', state.checkInTime);
+            setTxt('view-checkout', state.checkOutTime);
+            setTxt('view-doorcode', keycodeRevealed ? activePass.doorCode : t.tapToShow);
+            setTxt('view-wifi-ssid', state.wifiName);
+            setTxt('view-wifi-pass', state.wifiPass);
+            setTxt('view-address', state.address);
+            setTxt('view-host-phone', state.hostPhone);
+            setTxt('view-hotspot-count', `${state.hotspots.length} ${t.pinsWord}`);
+
+            const waLink = document.getElementById('view-whatsapp-link');
+            if (waLink) {
+                const cleanPhone = (state.hostPhone || '').replace(/[^0-9]/g, '');
+                waLink.href = `https://wa.me/${cleanPhone}`;
+            }
+
+            renderFloorplanHotspots();
+            renderGuestChecklistAndRules();
+            renderGuestLocalGems();
+            updateContextBanner();
+        }
+
+        // --- CONTEXT BANNER ---
+        function updateContextBanner() {
+            const banner = document.getElementById('dynamic-context-banner');
+            const icon = document.getElementById('context-banner-icon');
+            const title = document.getElementById('context-banner-title');
+            const sub = document.getElementById('context-banner-sub');
+            if (!banner || !icon || !title || !sub) return;
+
+            const palette = themePalettes[state.theme] || themePalettes.terracotta;
+            const t = i18n[currentGuestLang] || i18n.en;
+
+            banner.style.backgroundColor = palette.bannerBg;
+            banner.style.color = palette.bannerText;
+            banner.style.border = `1px solid ${palette.bannerBorder}`;
+
+            let hour = new Date().getHours();
+            if (hour >= 7 && hour < 12) {
+                icon.className = 'ph-fill ph-sun-horizon text-lg shrink-0 text-amber-600';
+                title.textContent = `${t.morningBanner} ${state.checkOutTime}`;
+                sub.textContent = t.morningSub;
+                banner.onclick = () => switchGuestTab('rules');
+            } else if (hour >= 22 || hour < 7) {
+                icon.className = 'ph-fill ph-moon-stars text-lg shrink-0 text-indigo-600';
+                title.textContent = t.nightBanner;
+                sub.textContent = t.nightSub;
+                banner.onclick = () => switchGuestTab('home');
+            } else {
+                icon.className = 'ph-fill ph-sparkle text-lg shrink-0 text-emerald-600';
+                title.textContent = t.welcomeBanner;
+                sub.textContent = `Wi-Fi: "${state.wifiName}" • ${t.arrivalSub}`;
+                banner.onclick = () => switchGuestTab('home');
+            }
+        }
+
+        // --- THEMES & FLOORPLAN ---
+        function setThemePreset(themeKey) {
+            state.theme = themeKey;
+            ['terracotta', 'sage', 'coastal', 'noir'].forEach(k => {
+                const btn = document.getElementById('theme-btn-' + k);
+                if (btn) {
+                    btn.className = k === themeKey
+                        ? 'p-2 rounded-xl border border-amber-500 bg-slate-800/90 text-left transition flex flex-col items-center gap-1'
+                        : 'p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col items-center gap-1';
+                }
+            });
+            applyTheme();
+            saveStateToLocalStorage();
+            renderGuestApp();
+        }
+
+        function applyTheme() {
+            const palette = themePalettes[state.theme] || themePalettes.terracotta;
+            const phoneWrapper = document.getElementById('guest-phone-wrapper');
+            if (phoneWrapper) {
+                phoneWrapper.style.setProperty('--theme-primary', palette.primary);
+                phoneWrapper.style.backgroundColor = palette.bg;
+            }
+            updateContextBanner();
+        }
+
+        function renderFloorplanHotspots() {
+            const palette = themePalettes[state.theme] || themePalettes.terracotta;
+            const bgLayer = document.getElementById('floorplan-bg-layer');
+            if (bgLayer) {
+                if (state.floorplanType === 'custom-image' && state.customFloorplanImage) {
+                    bgLayer.innerHTML = `<img src="${state.customFloorplanImage}" alt="Custom Floorplan" class="w-full h-full object-cover select-none pointer-events-none" onerror="this.src='https://placehold.co/800x600/F4EFE6/57534E?text=Custom+Floorplan+Image'">`;
+                } else {
+                    bgLayer.innerHTML = blueprintSVGs[state.floorplanType] || blueprintSVGs['blueprint-villa'];
+                }
+            }
+
+            const layer = document.getElementById('floorplan-pins-layer');
+            if (!layer) return;
+            layer.innerHTML = '';
+
+            state.hotspots.forEach((spot, idx) => {
+                const isSelected = spot.id === state.activeHotspotId;
+                const btn = document.createElement('button');
+                btn.className = `hotspot-pin absolute w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shadow-lg transition-all cursor-pointer ${
+                    isSelected ? 'ring-4 ring-white scale-110 z-20' : 'opacity-90 hover:opacity-100 z-10'
+                }`;
+                btn.style.left = `${spot.x}%`;
+                btn.style.top = `${spot.y}%`;
+                btn.style.backgroundColor = isSelected ? palette.primary : '#292524';
+                btn.style.color = '#FFFFFF';
+                btn.textContent = idx + 1;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    selectHotspot(spot.id);
+                };
+                layer.appendChild(btn);
+            });
+
+            const rawActiveSpot = state.hotspots.find(h => h.id === state.activeHotspotId) || state.hotspots[0];
+            if (rawActiveSpot) {
+                const activeSpot = getLocalizedHotspot(rawActiveSpot, currentGuestLang);
+                const idx = state.hotspots.indexOf(rawActiveSpot) + 1;
+                const badgeEl = document.getElementById('spot-card-badge');
+                const titleEl = document.getElementById('spot-card-title');
+                const descEl = document.getElementById('spot-card-desc');
+                if (badgeEl) badgeEl.textContent = `Pin #${idx} • ${activeSpot.room}`;
+                if (titleEl) titleEl.textContent = activeSpot.title;
+                if (descEl) descEl.textContent = activeSpot.desc;
+            }
+
+            const listEl = document.getElementById('guest-hotspot-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            state.hotspots.forEach((rawSpot, idx) => {
+                const spot = getLocalizedHotspot(rawSpot, currentGuestLang);
+                const isSelected = rawSpot.id === state.activeHotspotId;
+                const item = document.createElement('div');
+                item.onclick = () => selectHotspot(rawSpot.id);
+                item.className = `p-3 rounded-2xl border transition cursor-pointer flex items-start gap-3 ${
+                    isSelected ? 'bg-amber-50/70 border-amber-400' : 'bg-white border-stone-200/80 hover:border-stone-300'
+                }`;
+                item.innerHTML = `
+                    <div class="w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5" style="background-color: ${isSelected ? palette.primary : '#57534E'}">
+                        ${idx + 1}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">${spot.room}</span>
+                        <h5 class="text-xs font-bold text-stone-800">${spot.title}</h5>
+                        <p class="text-xs text-stone-600 mt-0.5 leading-relaxed">${spot.desc}</p>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function selectHotspot(id) {
+            state.activeHotspotId = id;
+            renderFloorplanHotspots();
+            if (!state.isExportedGuestOnly) {
+                renderEditorLists();
+            }
+        }
+
+        function handleFloorplanCanvasClick(event) {
+            if (state.isExportedGuestOnly) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = Math.round(((event.clientX - rect.left) / rect.width) * 100);
+            const y = Math.round(((event.clientY - rect.top) / rect.height) * 100);
+
+            const activeSpot = state.hotspots.find(h => h.id === state.activeHotspotId);
+            if (activeSpot) {
+                activeSpot.x = Math.max(8, Math.min(92, x));
+                activeSpot.y = Math.max(8, Math.min(92, y));
+                renderFloorplanHotspots();
+                renderEditorLists();
+                saveStateToLocalStorage();
+                showGuestToast(`Repositioned "${activeSpot.title}" pin!`);
+            }
+        }
+
+        // --- CHECKLIST & HOUSE RULES ---
+        function renderGuestChecklistAndRules() {
+            const t = i18n[currentGuestLang] || i18n.en;
+            const checklistEl = document.getElementById('guest-checkout-list');
+            if (checklistEl) {
+                checklistEl.innerHTML = '';
+                const completedCount = state.checkoutTasks.filter(item => item.done).length;
+                const totalCount = state.checkoutTasks.length;
+                const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+                const progressText = document.getElementById('checkout-progress-text');
+                const progressBar = document.getElementById('checkout-progress-bar');
+                if (progressText) progressText.textContent = `${completedCount} / ${totalCount} ${t.completedWord}`;
+                if (progressBar) progressBar.style.width = `${pct}%`;
+
+                state.checkoutTasks.forEach(task => {
+                    const localizedText = getLocalizedTaskText(task, currentGuestLang);
+                    const row = document.createElement('div');
+                    row.onclick = () => {
+                        task.done = !task.done;
+                        renderGuestChecklistAndRules();
+                    };
+                    row.className = `p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition ${
+                        task.done ? 'bg-emerald-50/70 border-emerald-300 text-stone-400 line-through' : 'bg-stone-50/70 border-stone-200 text-stone-800 hover:bg-stone-100/80'
+                    }`;
+                    row.innerHTML = `
+                        <div class="w-5 h-5 rounded-lg flex items-center justify-center border ${
+                            task.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-stone-300'
+                        }">
+                            ${task.done ? '<i class="ph-bold ph-check text-xs"></i>' : ''}
+                        </div>
+                        <span class="text-xs font-medium flex-1">${localizedText}</span>
+                    `;
+                    checklistEl.appendChild(row);
+                });
+            }
+
+            const rulesEl = document.getElementById('guest-rules-list');
+            if (rulesEl) {
+                rulesEl.innerHTML = '';
+                state.houseRules.forEach(rawRule => {
+                    const rule = getLocalizedRule(rawRule, currentGuestLang);
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-3.5 rounded-2xl border border-stone-200/90 shadow-sm space-y-1';
+                    card.innerHTML = `
+                        <h4 class="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                            <i class="ph-fill ph-info text-amber-600 text-sm"></i>
+                            <span>${rule.title}</span>
+                        </h4>
+                        <p class="text-xs text-stone-600 leading-relaxed pl-5">${rule.desc}</p>
+                    `;
+                    rulesEl.appendChild(card);
+                });
+            }
+        }
+
+        // --- LOCAL RECOMMENDATIONS ---
+        function renderGuestLocalGems() {
+            const t = i18n[currentGuestLang] || i18n.en;
+            const listEl = document.getElementById('guest-local-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            state.localGems.forEach(rawGem => {
+                const gem = getLocalizedGem(rawGem, currentGuestLang);
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-3xl border border-stone-200/90 shadow-sm space-y-2.5';
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">${gem.category}</span>
+                            <h4 class="text-sm font-bold text-stone-800 mt-0.5">${gem.name}</h4>
+                        </div>
+                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 shrink-0">${gem.distance}</span>
+                    </div>
+                    <p class="text-xs text-stone-600 leading-relaxed">"${gem.note}"</p>
+                    <div class="pt-1 border-t border-stone-100 flex justify-end">
+                        <a href="${gem.mapLink}" target="_blank" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-800 inline-flex items-center gap-1.5 transition">
+                            <i class="ph-bold ph-navigation-arrow"></i>
+                            <span>${t.openMaps}</span>
+                        </a>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        // --- CRUD HELPERS FOR EDITOR LISTS ---
+        function renderEditorLists() {
+            if (state.isExportedGuestOnly) return;
+
+            // Hotspots
+            const hsContainer = document.getElementById('hotspot-editor-list');
+            if (hsContainer) {
+                hsContainer.innerHTML = '';
+                state.hotspots.forEach((spot, index) => {
+                    const isSelected = spot.id === state.activeHotspotId;
+                    const box = document.createElement('div');
+                    box.className = `p-3.5 rounded-2xl border space-y-2.5 transition ${
+                        isSelected ? 'bg-slate-800/90 border-amber-500/80 shadow-md' : 'bg-slate-800/30 border-slate-800 hover:border-slate-700'
+                    }`;
+                    box.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <button onclick="selectHotspot(${spot.id}); switchGuestTab('floorplan');" class="flex items-center gap-2 text-left min-w-0">
+                                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0">${index + 1}</span>
+                                <span class="text-xs font-bold text-white truncate">${spot.title || 'Untitled Pin'}</span>
+                            </button>
+                            <button onclick="deleteHotspot(${spot.id})" title="Delete Pin" class="w-7 h-7 rounded-lg bg-slate-900/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 flex items-center justify-center transition shrink-0">
+                                <i class="ph-bold ph-trash text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Room</label>
+                                <input type="text" value="${spot.room}" oninput="updateHotspot(${spot.id}, 'room', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Title</label>
+                                <input type="text" value="${spot.title}" oninput="updateHotspot(${spot.id}, 'title', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Instructions</label>
+                            <textarea rows="2" oninput="updateHotspot(${spot.id}, 'desc', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-300">${spot.desc}</textarea>
+                        </div>
+                    `;
+                    hsContainer.appendChild(box);
+                });
+            }
+
+            // Checkout tasks
+            const coContainer = document.getElementById('checkout-editor-list');
+            if (coContainer) {
+                coContainer.innerHTML = '';
+                state.checkoutTasks.forEach(task => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center gap-2';
+                    item.innerHTML = `
+                        <input type="text" value="${task.text}" oninput="updateCheckoutTask(${task.id}, this.value)" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        <button onclick="deleteCheckoutTask(${task.id})" class="p-2 text-slate-500 hover:text-rose-400">
+                            <i class="ph-bold ph-trash"></i>
+                        </button>
+                    `;
+                    coContainer.appendChild(item);
+                });
+            }
+
+            // Rules
+            const rulesContainer = document.getElementById('rules-editor-list');
+            if (rulesContainer) {
+                rulesContainer.innerHTML = '';
+                state.houseRules.forEach(rule => {
+                    const item = document.createElement('div');
+                    item.className = 'p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2';
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <input type="text" value="${rule.title}" oninput="updateRuleField(${rule.id}, 'title', this.value)" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-semibold text-white">
+                            <button onclick="deleteHouseRule(${rule.id})" class="text-slate-500 hover:text-rose-400 p-1">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                        <textarea rows="2" oninput="updateRuleField(${rule.id}, 'desc', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300">${rule.desc}</textarea>
+                    `;
+                    rulesContainer.appendChild(item);
+                });
+            }
+
+            // Local Gems
+            const localContainer = document.getElementById('local-editor-list');
+            if (localContainer) {
+                localContainer.innerHTML = '';
+                state.localGems.forEach(gem => {
+                    const box = document.createElement('div');
+                    box.className = 'p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 space-y-2';
+                    box.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <input type="text" value="${gem.name}" oninput="updateGemField(${gem.id}, 'name', this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white w-2/3">
+                            <button onclick="deleteLocalGem(${gem.id})" class="text-slate-500 hover:text-rose-400 p-1">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" value="${gem.category}" placeholder="Category" oninput="updateGemField(${gem.id}, 'category', this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-amber-300">
+                            <input type="text" value="${gem.distance}" placeholder="Distance" oninput="updateGemField(${gem.id}, 'distance', this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300">
+                        </div>
+                        <textarea rows="2" oninput="updateGemField(${gem.id}, 'note', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300">${gem.note}</textarea>
+                    `;
+                    localContainer.appendChild(box);
+                });
+            }
+        }
+
+        function updateHotspot(id, field, val) {
+            const spot = state.hotspots.find(s => s.id === id);
+            if (spot) {
+                spot[field] = val;
+                saveStateToLocalStorage();
+                renderFloorplanHotspots();
+            }
+        }
+
+        function addNewHotspot() {
+            const newId = Date.now();
+            state.hotspots.push({
+                id: newId,
+                room: 'Living Room',
+                title: 'New Appliance Guide',
+                x: 50,
+                y: 50,
+                desc: 'Tap the floorplan to position this pin and describe how this appliance operates.'
+            });
+            state.activeHotspotId = newId;
+            saveStateToLocalStorage();
+            switchGuestTab('floorplan');
+            renderFloorplanHotspots();
+            renderEditorLists();
+        }
+
+        function deleteHotspot(id) {
+            if (state.hotspots.length <= 1) return;
+            state.hotspots = state.hotspots.filter(s => s.id !== id);
+            state.activeHotspotId = state.hotspots[0].id;
+            saveStateToLocalStorage();
+            renderFloorplanHotspots();
+            renderEditorLists();
+        }
+
+        function updateCheckoutTask(id, val) {
+            const task = state.checkoutTasks.find(t => t.id === id);
+            if (task) {
+                task.text = val;
+                saveStateToLocalStorage();
+                renderGuestChecklistAndRules();
+            }
+        }
+
+        function addCheckoutTask() {
+            state.checkoutTasks.push({ id: Date.now(), text: 'New departure checklist item', done: false });
+            saveStateToLocalStorage();
+            renderEditorLists();
+            renderGuestChecklistAndRules();
+        }
+
+        function deleteCheckoutTask(id) {
+            state.checkoutTasks = state.checkoutTasks.filter(t => t.id !== id);
+            saveStateToLocalStorage();
+            renderEditorLists();
+            renderGuestChecklistAndRules();
+        }
+
+        function updateRuleField(id, field, val) {
+            const rule = state.houseRules.find(r => r.id === id);
+            if (rule) {
+                rule[field] = val;
+                saveStateToLocalStorage();
+                renderGuestChecklistAndRules();
+            }
+        }
+
+        function addHouseRule() {
+            state.houseRules.push({ id: Date.now(), title: 'New House Rule', desc: 'Briefly explain this requirement for guests.' });
+            saveStateToLocalStorage();
+            renderEditorLists();
+            renderGuestChecklistAndRules();
+        }
+
+        function deleteHouseRule(id) {
+            state.houseRules = state.houseRules.filter(r => r.id !== id);
+            saveStateToLocalStorage();
+            renderEditorLists();
+            renderGuestChecklistAndRules();
+        }
+
+        function updateGemField(id, field, val) {
+            const gem = state.localGems.find(g => g.id === id);
+            if (gem) {
+                gem[field] = val;
+                saveStateToLocalStorage();
+                renderGuestLocalGems();
+            }
+        }
+
+        function addLocalGem() {
+            state.localGems.push({
+                id: Date.now(),
+                category: 'Favorite Spot',
+                name: 'Local Gem Name',
+                distance: '5 min walk',
+                note: 'Tell guests what you love here or what to order.',
+                mapLink: 'https://maps.google.com'
+            });
+            saveStateToLocalStorage();
+            switchGuestTab('local');
+            renderEditorLists();
+            renderGuestLocalGems();
+        }
+
+        function deleteLocalGem(id) {
+            state.localGems = state.localGems.filter(g => g.id !== id);
+            saveStateToLocalStorage();
+            renderEditorLists();
+            renderGuestLocalGems();
+        }
+
+        function setFloorplanType(type) {
+            state.floorplanType = type;
+            updateFloorplanSelectorUI();
+            saveStateToLocalStorage();
+            renderFloorplanHotspots();
+            showGuestToast('Updated floorplan layout');
+        }
+
+        function updateFloorplanSelectorUI() {
+            if (state.isExportedGuestOnly) return;
+            const map = {
+                'blueprint-villa': 'fp-btn-villa',
+                'blueprint-cabin': 'fp-btn-cabin',
+                'blueprint-loft': 'fp-btn-loft'
+            };
+            Object.keys(map).forEach(key => {
+                const btn = document.getElementById(map[key]);
+                if (!btn) return;
+                const isSelected = state.floorplanType === key;
+                btn.className = isSelected
+                    ? 'p-2 rounded-xl border border-amber-500 bg-slate-800/90 text-left transition flex flex-col gap-1'
+                    : 'p-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-left transition flex flex-col gap-1';
+            });
+        }
+
+        function handleFloorplanFileUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 900;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    state.customFloorplanImage = canvas.toDataURL('image/jpeg', 0.82);
+                    state.floorplanType = 'custom-image';
+                    updateFloorplanSelectorUI();
+                    saveStateToLocalStorage();
+                    renderFloorplanHotspots();
+                    showGuestToast('Custom floorplan uploaded!');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- PERMANENT TABLE SIGN RENDERING ---
+        function renderPrintableSign() {
+            if (state.isExportedGuestOnly) return;
+            const printName = document.getElementById('print-prop-name');
+            if (!printName) return;
+
+            printName.textContent = state.propertyName;
+            document.getElementById('print-prop-loc').textContent = state.location;
+            document.getElementById('print-wifi-ssid').textContent = state.wifiName;
+            document.getElementById('print-wifi-pass').textContent = state.wifiPass;
+            document.getElementById('print-checkout').textContent = state.checkOutTime;
+            document.getElementById('print-host-contact').textContent = `${state.hostName} • ${state.hostPhone}`;
+
+            // QR 1: Camera Auto-Connect Wi-Fi Code (Native WIFI Protocol)
+            const wifiCodeString = `WIFI:T:WPA;S:${state.wifiName};P:${state.wifiPass};;`;
+            const wifiEncoded = encodeURIComponent(wifiCodeString);
+            document.getElementById('print-wifi-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=${wifiEncoded}`;
+
+            // QR 2: Permanent Guidebook URL
+            const guideEncoded = encodeURIComponent(state.guidebookUrl || 'https://staycraft.app/villasolis');
+            document.getElementById('print-guide-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=${guideEncoded}`;
+        }
+
+        // --- NAVIGATION TABS ---
+        function switchGuestTab(tabName) {
+            currentGuestTab = tabName;
+            ['home', 'floorplan', 'rules', 'local'].forEach(t => {
+                const pane = document.getElementById('guest-tab-' + t);
+                const navBtn = document.getElementById('gnav-' + t);
+                if (pane && navBtn) {
+                    if (t === tabName) {
+                        pane.classList.remove('hidden');
+                        navBtn.className = 'flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-amber-700 bg-amber-50/80 font-bold text-[11px] transition';
+                    } else {
+                        pane.classList.add('hidden');
+                        navBtn.className = 'flex-1 py-2 rounded-2xl flex flex-col items-center gap-1 text-stone-400 hover:text-stone-700 font-medium text-[11px] transition';
+                    }
+                }
+            });
+            const scrollContainer = document.getElementById('guest-app-scroll');
+            if (scrollContainer) scrollContainer.scrollTop = 0;
+        }
+
+        function switchEditorTab(tabName) {
+            if (state.isExportedGuestOnly) return;
+            currentEditorTab = tabName;
+            ['general', 'passes', 'floorplan', 'rules', 'local', 'share'].forEach(t => {
+                const pane = document.getElementById('ed-pane-' + t);
+                const btn = document.getElementById('ed-tab-' + t);
+                if (pane && btn) {
+                    if (t === tabName) {
+                        pane.classList.remove('hidden');
+                        btn.className = 'py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 bg-slate-800 text-amber-400 border border-slate-700 shadow-sm transition-all';
+                    } else {
+                        pane.classList.add('hidden');
+                        btn.className = 'py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all';
+                    }
+                }
+            });
+
+            if (tabName === 'general') switchGuestTab('home');
+            if (tabName === 'floorplan') switchGuestTab('floorplan');
+            if (tabName === 'rules') switchGuestTab('rules');
+            if (tabName === 'local') switchGuestTab('local');
+        }
+
+        function setStudioMode(mode) {
+            const sidebar = document.getElementById('builder-sidebar');
+            const phone = document.getElementById('guest-phone-wrapper');
+            const printWrap = document.getElementById('print-view-wrapper');
+            if (!sidebar || !printWrap || !phone) return;
+
+            ['split', 'guest', 'print'].forEach(m => {
+                const btn = document.getElementById('mode-btn-' + m);
+                if (btn) {
+                    btn.className = m === mode
+                        ? 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-amber-500 text-slate-950 shadow'
+                        : 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white';
+                }
+            });
+
+            if (mode === 'split') {
+                sidebar.classList.remove('hidden');
+                phone.classList.remove('hidden');
+                printWrap.classList.add('hidden');
+                printWrap.classList.remove('flex');
+            } else if (mode === 'guest') {
+                sidebar.classList.add('hidden');
+                phone.classList.remove('hidden');
+                printWrap.classList.add('hidden');
+                printWrap.classList.remove('flex');
+            } else if (mode === 'print') {
+                sidebar.classList.add('hidden');
+                phone.classList.add('hidden');
+                printWrap.classList.remove('hidden');
+                printWrap.classList.add('flex');
+                renderPrintableSign();
+            }
+        }
+
+        function setGuestLang(lang) {
+            currentGuestLang = lang;
+            ['en', 'it', 'es', 'fr', 'de'].forEach(l => {
+                const btn = document.getElementById('lang-btn-' + l);
+                if (!btn) return;
+                btn.className = l === lang
+                    ? 'px-2.5 py-1 rounded-full font-bold bg-white text-slate-900 transition'
+                    : 'px-2 py-1 rounded-full font-medium text-white/80 hover:text-white transition';
+            });
+            renderGuestApp();
+            const names = { en: 'English', it: 'Italiano', es: 'Español', fr: 'Français', de: 'Deutsch' };
+            showGuestToast(`Switched to ${names[lang] || lang}`);
+        }
+
+        function toggleKeycodeReveal() {
+            keycodeRevealed = !keycodeRevealed;
+            renderGuestApp();
+            const activePass = getActivePass();
+            if (keycodeRevealed && activePass) {
+                copyTextToClipboard(activePass.doorCode, `Door code "${activePass.doorCode}" revealed & copied!`);
+            }
+        }
+
+        function copyWifiPassword() {
+            copyTextToClipboard(state.wifiPass, 'Wi-Fi Password copied to clipboard!');
+        }
+
+        function copyTextToClipboard(text, message) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => showGuestToast(message)).catch(() => fallbackCopy(text, message));
+            } else {
+                fallbackCopy(text, message);
+            }
+        }
+
+        function fallbackCopy(text, message) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showGuestToast(message);
+        }
+
+        function showGuestToast(msg) {
+            const toast = document.getElementById('guest-toast');
+            if (!toast) return;
+            document.getElementById('guest-toast-msg').textContent = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2200);
+        }
+
+        function resetToDefaultsPrompt() {
+            if (confirm('Reset all property details to default sample values?')) {
+                localStorage.removeItem('staycraft_saved_state_v2');
+                location.reload();
+            }
+        }
+
+        // --- BULLETPROOF STANDALONE EXPORTER ---
+        function exportStandaloneGuestApp() {
+            const exportState = JSON.parse(JSON.stringify(state));
+            exportState.isExportedGuestOnly = true;
+
+            const docClone = document.documentElement.cloneNode(true);
+            const removeSelectors = [
+                '#studio-header',
+                '#time-travel-tester',
+                '#builder-sidebar',
+                '#print-view-wrapper'
+            ];
+            removeSelectors.forEach(sel => {
+                const el = docClone.querySelector(sel);
+                if (el) el.remove();
+            });
+
+            const phoneWrapper = docClone.querySelector('#guest-phone-wrapper');
+            if (phoneWrapper) {
+                phoneWrapper.className = 'w-full max-w-md min-h-screen bg-[#FAF6F0] text-slate-800 flex flex-col relative select-none shadow-2xl sm:my-6 sm:rounded-3xl border-0 overflow-hidden';
+                const notch = phoneWrapper.querySelector('#phone-speaker-notch');
+                if (notch) notch.remove();
+            }
+
+            const mainContainer = docClone.querySelector('main');
+            if (mainContainer) {
+                mainContainer.className = 'flex-1 bg-slate-900/40 relative min-h-screen flex items-start justify-center p-0 sm:p-4 overflow-y-auto';
+            }
+
+            const bodyEl = docClone.querySelector('body');
+            if (bodyEl) {
+                bodyEl.className = 'bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-y-auto select-none';
+            }
+
+            const stateScript = docClone.querySelector('#staycraft-state-script');
+            if (stateScript) {
+                stateScript.textContent = `
+        let state = ${JSON.stringify(exportState, null, 2)};
+                `;
+            }
+
+            const finalHtml = '<!DOCTYPE html>\n' + docClone.outerHTML;
+            const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const slug = (state.propertyName || 'my-property').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            a.href = url;
+            a.download = `${slug}-guest-pass.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showGuestToast('Exported Standalone Guest App (.html)!');
+        }
+
+        function exportProjectJSON() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'staycraft-project-backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showGuestToast('Saved project backup!');
+        }
+
+        // Auto-translate helper
+        async function autoTranslateAllContent() {
+            const btn = document.getElementById('btn-auto-translate');
+            const icon = document.getElementById('btn-trans-icon');
+            const label = document.getElementById('btn-trans-label');
+            const badge = document.getElementById('trans-badge');
+
+            if (!btn) return;
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-wait');
+            icon.className = 'ph-bold ph-spinner animate-spin text-sm';
+            label.textContent = 'Translating: Preparing text segments...';
+            badge.textContent = 'Translating...';
+            badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
+
+            const targetLangs = ['it', 'es', 'fr', 'de'];
+            if (!state.translations) state.translations = {};
+
+            const translateText = async (text, targetLang) => {
+                if (!text || !text.trim()) return text;
+                try {
+                    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+                    const res = await fetch(url);
+                    if (!res.ok) return text;
+                    const data = await res.json();
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        return data.responseData.translatedText;
+                    }
+                } catch (e) {}
+                return text;
+            };
+
+            for (const lang of targetLangs) {
+                if (!state.translations[lang]) state.translations[lang] = { hotspots: {}, checkoutTasks: {}, houseRules: {}, localGems: {} };
+                state.translations[lang].location = await translateText(state.location, lang);
+
+                for (const spot of state.hotspots) {
+                    state.translations[lang].hotspots[spot.id] = {
+                        room: await translateText(spot.room, lang),
+                        title: await translateText(spot.title, lang),
+                        desc: await translateText(spot.desc, lang)
+                    };
+                }
+                for (const task of state.checkoutTasks) {
+                    state.translations[lang].checkoutTasks[task.id] = await translateText(task.text, lang);
+                }
+                for (const rule of state.houseRules) {
+                    state.translations[lang].houseRules[rule.id] = {
+                        title: await translateText(rule.title, lang),
+                        desc: await translateText(rule.desc, lang)
+                    };
+                }
+                for (const gem of state.localGems) {
+                    state.translations[lang].localGems[gem.id] = {
+                        category: await translateText(gem.category, lang),
+                        note: await translateText(gem.note, lang)
+                    };
+                }
+            }
+
+            saveStateToLocalStorage();
+            renderGuestApp();
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-wait');
+            icon.className = 'ph-bold ph-check text-sm';
+            label.textContent = '✨ Complete! All 5 Languages Synced';
+            badge.textContent = '100% Synced';
+            badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            showGuestToast('All instructions auto-translated to IT, ES, FR & DE!');
+        }
+    </script>
+</body>
+</html>
