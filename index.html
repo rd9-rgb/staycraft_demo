@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StayCraft Studio — Interactive Multilingual Guidebook & Expiring Guest Pass</title>
+    <title>StayPin Studio — Interactive Multilingual Guidebook & Smart PIN Access</title>
     <!-- Web App & PWA Metadata -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -96,24 +96,35 @@
         <!-- Logo & Title -->
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
-                <i class="ph-fill ph-house-line text-xl text-white"></i>
+                <i class="ph-fill ph-map-pin text-xl text-white"></i>
             </div>
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-base tracking-tight text-white">StayCraft</span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Auto-Expiring Passes</span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hidden sm:inline">5 Languages Active</span>
+                    <span class="font-bold text-base tracking-tight text-white">StayPin</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Smart PIN Passes</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hidden sm:inline">5 Languages</span>
                 </div>
-                <p class="text-[11px] text-slate-400 hidden sm:block">Smart Auto-Expiring Guidebooks & Permanent Dual-QR Frame</p>
+                <p class="text-[11px] text-slate-400 hidden sm:block">Pinpoint Your Stay — Interactive Guidebooks & Smart Access</p>
             </div>
         </div>
 
-        <!-- 1-Click Turnkey Property Presets -->
-        <div class="hidden xl:flex items-center gap-2 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-xs">
-            <span class="text-[10px] uppercase font-bold text-slate-400 pl-2 pr-1">✨ Template:</span>
-            <button onclick="loadPropertyPreset('villa')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">Villa</button>
-            <button onclick="loadPropertyPreset('cabin')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">Cabin</button>
-            <button onclick="loadPropertyPreset('loft')" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition">City Loft</button>
+        <!-- Property Portfolio Selector (Solo & Multi-Unit Mode) -->
+        <div id="property-portfolio-bar" class="flex items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800 text-xs shadow-inner">
+            <div class="flex items-center gap-1 px-1.5 text-amber-400">
+                <i class="ph-fill ph-buildings text-sm"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 hidden xl:inline">Listing:</span>
+            </div>
+            <select id="property-selector" onchange="switchProperty(this.value)" class="bg-slate-900 hover:bg-slate-850 text-white font-semibold text-xs rounded-lg px-2.5 py-1 border border-slate-700 focus:border-amber-500 focus:outline-none cursor-pointer max-w-[150px] sm:max-w-[200px] truncate">
+                <option value="prop_1">Villa Solis Sanctuary</option>
+            </select>
+            <button onclick="promptAddNewProperty()" title="Add New Property Listing" class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer">
+                <i class="ph-bold ph-plus-circle"></i>
+                <span class="hidden md:inline">Add</span>
+            </button>
+            <button onclick="duplicateActiveProperty()" title="Duplicate Active Listing" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-medium flex items-center gap-1 transition cursor-pointer">
+                <i class="ph-bold ph-copy"></i>
+                <span class="hidden md:inline">Clone</span>
+            </button>
         </div>
 
         <!-- View Mode Switcher -->
@@ -297,8 +308,15 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">Hero Image URL</label>
-                            <input type="text" id="inp-hero-img" oninput="updateField('heroImage', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:border-amber-500 focus:outline-none">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs text-slate-400">Hero Cover Image</label>
+                                <button type="button" onclick="document.getElementById('inp-hero-file').click()" class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer transition">
+                                    <i class="ph-bold ph-upload-simple"></i>
+                                    <span>Upload from Device</span>
+                                </button>
+                            </div>
+                            <input type="file" id="inp-hero-file" accept="image/*" class="hidden" onchange="handleHeroFileUpload(event)">
+                            <input type="text" id="inp-hero-img" placeholder="Paste image URL or click Upload above" oninput="updateField('heroImage', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:border-amber-500 focus:outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -399,9 +417,15 @@
                             <p id="pass-display-dates" class="text-[11px] text-slate-400 mt-0.5">Nov 18, 3:00 PM → Nov 21, 11:00 AM</p>
                         </div>
 
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-[11px] text-emerald-400 break-all select-all flex items-center justify-between gap-2">
-                            <span id="pass-display-url">https://staycraft.app/villasolis/pass-8821</span>
-                            <button onclick="copyGeneratedPassUrl()" class="px-2 py-1 rounded bg-slate-800 text-slate-200 hover:text-white text-[10px] shrink-0">Copy Link</button>
+                        <div class="space-y-2">
+                            <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-[11px] text-emerald-400 break-all select-all flex items-center justify-between gap-2">
+                                <span id="pass-display-url">https://staypin.app/villasolis?pass=pass_101</span>
+                                <button onclick="copyGeneratedPassUrl()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-[10px] shrink-0 font-medium transition cursor-pointer">Copy</button>
+                            </div>
+                            <button onclick="copyPortableLiveShareUrl()" class="w-full py-2 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                <i class="ph-bold ph-share-network text-sm"></i>
+                                <span>Copy Portable Pass Link (Open on Any Phone)</span>
+                            </button>
                         </div>
 
                         <!-- 1-Click Airbnb Chat Template -->
@@ -985,7 +1009,9 @@
             wifiPass: 'limoncello2025',
             hostPhone: '+39 089 812 3456',
             address: 'Via Cristoforo Colombo 42, 84017 Positano SA, Italy',
-            guidebookUrl: 'https://staycraft.app/villasolis',
+            guidebookUrl: 'https://staypin.app/villasolis',
+            activePropertyId: 'prop_1',
+            properties: [],
             
             // Guest Bookings & Passes Engine
             activePassId: 'pass_101',
@@ -1194,10 +1220,26 @@
 
         if (!state.isExportedGuestOnly) {
             try {
-                const saved = localStorage.getItem('staycraft_saved_state_v2');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    state = Object.assign({}, state, parsed);
+                // 1. Check if opened via Portable Share Link (#share=...)
+                if (window.location.hash && window.location.hash.startsWith('#share=')) {
+                    try {
+                        const raw = window.location.hash.slice(7);
+                        const jsonStr = decodeURIComponent(escape(atob(raw)));
+                        const shared = JSON.parse(jsonStr);
+                        if (shared && shared.propertyName) {
+                            state = Object.assign({}, state, shared);
+                            state.isPortableSharedView = true;
+                        }
+                    } catch (e) {
+                        console.warn('Could not decode shared pass payload:', e);
+                    }
+                } else {
+                    // 2. Load from localStorage (StayPin v1, with fallback to legacy v2)
+                    const saved = localStorage.getItem('staypin_saved_state_v1') || localStorage.getItem('staycraft_saved_state_v2');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        state = Object.assign({}, state, parsed);
+                    }
                 }
             } catch (e) {}
         }
@@ -1244,7 +1286,8 @@
                 morningSub: 'Tap Check-Out tab to complete your departure checklist.',
                 nightBanner: 'Quiet Hours in Effect (10:30 PM - 8:00 AM)',
                 nightSub: 'Relax peacefully. Urgent host contact below.',
-                translateChip: 'Translate'
+                translateChip: 'Translate',
+                unlocksAt: 'Unlocks {date} at {time}'
             },
             it: {
                 hostedBy: 'Ospitato da',
@@ -1282,7 +1325,8 @@
                 morningSub: 'Tocca Partenza per completare la checklist di check-out.',
                 nightBanner: 'Orari di Silenzio (22:30 - 08:00)',
                 nightSub: 'Buon riposo. Contatto urgente dell\'host qui sotto.',
-                translateChip: 'Traduci'
+                translateChip: 'Traduci',
+                unlocksAt: 'Si sblocca il {date} alle {time}'
             },
             es: {
                 hostedBy: 'Anfitrión:',
@@ -1320,7 +1364,8 @@
                 morningSub: 'Toca la pestaña Salida para completar la lista de tareas.',
                 nightBanner: 'Horas de Silencio (22:30 - 08:00)',
                 nightSub: 'Descansa plácidamente. Contacto urgente abajo.',
-                translateChip: 'Traducir'
+                translateChip: 'Traducir',
+                unlocksAt: 'Se desbloquea el {date} a las {time}'
             },
             fr: {
                 hostedBy: 'Hôte :',
@@ -1358,7 +1403,8 @@
                 morningSub: 'Consultez la checklist de départ avant de quitter les lieux.',
                 nightBanner: 'Heures de Silence (22h30 - 08h00)',
                 nightSub: 'Reposez-vous paisiblement. Contact d\'urgence ci-dessous.',
-                translateChip: 'Traduire'
+                translateChip: 'Traduire',
+                unlocksAt: 'Déverrouillage le {date} à {time}'
             },
             de: {
                 hostedBy: 'Gastgeber:',
@@ -1396,7 +1442,8 @@
                 morningSub: 'Tippe auf Abreise, um die Checkliste auszufüllen.',
                 nightBanner: 'Ruhezeiten (22:30 - 08:00 Uhr)',
                 nightSub: 'Gute Erholung. Notfallkontakt unten angegeben.',
-                translateChip: 'Übersetzen'
+                translateChip: 'Übersetzen',
+                unlocksAt: 'Freischaltung am {date} um {time}'
             }
         };
 
@@ -1540,11 +1587,17 @@
                 const printWrap = document.getElementById('print-view-wrapper');
                 if (printWrap) printWrap.remove();
             } else {
+                ensurePropertiesArray();
+                renderPropertySelector();
                 initDefaultBookingDates();
                 populateEditorInputs();
                 renderEditorLists();
                 renderPassesList();
                 renderPrintableSign();
+            }
+            if (state.isPortableSharedView) {
+                setStudioMode('guest');
+                showGuestToast(`Loaded shared pass for "${state.propertyName}"!`);
             }
             applyTheme();
             updateSimulationStageUI();
@@ -1588,15 +1641,257 @@
 
         function updateField(key, value) {
             state[key] = value;
+            if (key === 'propertyName') {
+                renderPropertySelector();
+            }
             saveStateToLocalStorage();
             renderGuestApp();
             renderPrintableSign();
         }
 
-        function saveStateToLocalStorage() {
+        // --- MULTI-PROPERTY & PORTFOLIO ENGINE ---
+        function ensurePropertiesArray() {
+            if (!state.properties || !Array.isArray(state.properties) || state.properties.length === 0) {
+                state.properties = [ extractPropertySnapshot('prop_1', state.propertyName || 'Villa Solis Sanctuary') ];
+                state.activePropertyId = 'prop_1';
+            }
+        }
+
+        function extractPropertySnapshot(id, name) {
+            return {
+                id: id || ('prop_' + Date.now()),
+                propertyName: name || state.propertyName || 'My Listing',
+                location: state.location || '',
+                hostName: state.hostName || '',
+                heroImage: state.heroImage || '',
+                checkInTime: state.checkInTime || '3:00 PM',
+                checkOutTime: state.checkOutTime || '11:00 AM',
+                wifiName: state.wifiName || '',
+                wifiPass: state.wifiPass || '',
+                hostPhone: state.hostPhone || '',
+                address: state.address || '',
+                theme: state.theme || 'terracotta',
+                floorplanType: state.floorplanType || 'blueprint-villa',
+                customFloorplanImage: state.customFloorplanImage || '',
+                passes: JSON.parse(JSON.stringify(state.passes || [])),
+                activePassId: state.activePassId,
+                hotspots: JSON.parse(JSON.stringify(state.hotspots || [])),
+                checkoutTasks: JSON.parse(JSON.stringify(state.checkoutTasks || {})),
+                houseRules: JSON.parse(JSON.stringify(state.houseRules || {})),
+                localGems: JSON.parse(JSON.stringify(state.localGems || {})),
+                translations: JSON.parse(JSON.stringify(state.translations || {}))
+            };
+        }
+
+        function saveActivePropertyToCollection() {
+            ensurePropertiesArray();
+            const idx = state.properties.findIndex(p => p.id === state.activePropertyId);
+            const snapshot = extractPropertySnapshot(state.activePropertyId, state.propertyName);
+            if (idx >= 0) {
+                state.properties[idx] = snapshot;
+            } else {
+                state.properties.push(snapshot);
+            }
+        }
+
+        function loadPropertyFromCollection(prop) {
+            if (!prop) return;
+            state.propertyName = prop.propertyName || 'My Listing';
+            state.location = prop.location || '';
+            state.hostName = prop.hostName || '';
+            state.heroImage = prop.heroImage || '';
+            state.checkInTime = prop.checkInTime || '3:00 PM';
+            state.checkOutTime = prop.checkOutTime || '11:00 AM';
+            state.wifiName = prop.wifiName || '';
+            state.wifiPass = prop.wifiPass || '';
+            state.hostPhone = prop.hostPhone || '';
+            state.address = prop.address || '';
+            state.theme = prop.theme || 'terracotta';
+            state.floorplanType = prop.floorplanType || 'blueprint-villa';
+            state.customFloorplanImage = prop.customFloorplanImage || '';
+            state.passes = prop.passes && prop.passes.length ? prop.passes : state.passes;
+            state.activePassId = prop.activePassId || (state.passes[0] ? state.passes[0].id : '');
+            state.hotspots = prop.hotspots || [];
+            state.checkoutTasks = prop.checkoutTasks || {};
+            state.houseRules = prop.houseRules || {};
+            state.localGems = prop.localGems || {};
+            state.translations = prop.translations || {};
+
+            applyTheme(state.theme);
+            populateEditorInputs();
+            renderPassesList();
+            renderFloorplanHotspots();
+            renderEditorLists();
+            renderGuestApp();
+            renderPrintableSign();
+            renderPropertySelector();
+        }
+
+        function renderPropertySelector() {
             if (state.isExportedGuestOnly) return;
+            ensurePropertiesArray();
+            const sel = document.getElementById('property-selector');
+            if (!sel) return;
+            sel.innerHTML = '';
+            state.properties.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.propertyName;
+                if (p.id === state.activePropertyId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function switchProperty(propId) {
+            saveActivePropertyToCollection();
+            const target = state.properties.find(p => p.id === propId);
+            if (!target) return;
+            state.activePropertyId = propId;
+            loadPropertyFromCollection(target);
+            saveStateToLocalStorage();
+            showGuestToast(`Switched to "${target.propertyName}"`);
+        }
+
+        function promptAddNewProperty() {
+            const name = prompt('Enter a name for your new property listing:', 'Seaside Cabin');
+            if (!name || !name.trim()) return;
+            saveActivePropertyToCollection();
+            const newId = 'prop_' + Date.now();
+            const newProp = {
+                id: newId,
+                propertyName: name.trim(),
+                location: 'Scenic Retreat',
+                hostName: state.hostName || 'Host',
+                heroImage: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1000&q=80',
+                checkInTime: '3:00 PM',
+                checkOutTime: '11:00 AM',
+                wifiName: name.trim().replace(/[^a-zA-Z0-9]/g, '') + '_Guest',
+                wifiPass: 'welcome' + Math.floor(100 + Math.random() * 900),
+                hostPhone: state.hostPhone || '',
+                address: '123 Coastal Highway',
+                theme: 'sage',
+                floorplanType: 'blueprint-cabin',
+                customFloorplanImage: '',
+                passes: [{
+                    id: 'pass_' + Math.floor(1000 + Math.random() * 9000),
+                    guestName: 'First Guest',
+                    checkIn: new Date().toISOString().slice(0, 16),
+                    checkOut: new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 16),
+                    doorCode: '#' + Math.floor(1000 + Math.random() * 9000) + '*',
+                    status: 'active'
+                }],
+                activePassId: '',
+                hotspots: [
+                    { id: 1, room: 'Living Area', title: 'Smart Fireplace & A/C', x: 45, y: 40, desc: 'Use remote on the mantel.' }
+                ],
+                checkoutTasks: { 101: 'Lock front door', 102: 'Dispose trash in outside bin' },
+                houseRules: { 201: { title: 'Quiet Hours', desc: '10:00 PM - 8:00 AM' } },
+                localGems: { 301: { category: 'Bakery', note: 'Best sourdough 5 min away.' } },
+                translations: {}
+            };
+            newProp.activePassId = newProp.passes[0].id;
+            state.properties.push(newProp);
+            state.activePropertyId = newId;
+            loadPropertyFromCollection(newProp);
+            saveStateToLocalStorage();
+            showGuestToast(`Added "${newProp.propertyName}"!`);
+        }
+
+        function duplicateActiveProperty() {
+            saveActivePropertyToCollection();
+            const current = state.properties.find(p => p.id === state.activePropertyId) || state.properties[0];
+            const copyName = prompt('Enter a name for the cloned listing:', (current.propertyName || 'Property') + ' (Copy)');
+            if (!copyName || !copyName.trim()) return;
+            const cloned = JSON.parse(JSON.stringify(current));
+            cloned.id = 'prop_' + Date.now();
+            cloned.propertyName = copyName.trim();
+            state.properties.push(cloned);
+            state.activePropertyId = cloned.id;
+            loadPropertyFromCollection(cloned);
+            saveStateToLocalStorage();
+            showGuestToast(`Cloned to "${cloned.propertyName}"!`);
+        }
+
+        // --- HERO COVER PHOTO FILE UPLOADER (CANVAS COMPRESSED) ---
+        function handleHeroFileUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 1200;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    state.heroImage = dataUrl;
+                    const inp = document.getElementById('inp-hero-img');
+                    if (inp) inp.value = '(Uploaded from device)';
+                    saveStateToLocalStorage();
+                    renderGuestApp();
+                    showGuestToast('Property cover photo updated!');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- PORTABLE LIVE SHARE LINK GENERATOR ---
+        function copyPortableLiveShareUrl() {
             try {
-                localStorage.setItem('staycraft_saved_state_v2', JSON.stringify(state));
+                const activePass = getActivePass();
+                const sharePayload = {
+                    propertyName: state.propertyName,
+                    location: state.location,
+                    hostName: state.hostName,
+                    heroImage: state.heroImage,
+                    checkInTime: state.checkInTime,
+                    checkOutTime: state.checkOutTime,
+                    wifiName: state.wifiName,
+                    wifiPass: state.wifiPass,
+                    hostPhone: state.hostPhone,
+                    address: state.address,
+                    theme: state.theme,
+                    floorplanType: state.floorplanType,
+                    customFloorplanImage: state.customFloorplanImage,
+                    hotspots: state.hotspots,
+                    checkoutTasks: state.checkoutTasks,
+                    houseRules: state.houseRules,
+                    localGems: state.localGems,
+                    translations: state.translations,
+                    simulationStage: state.simulationStage || 'active',
+                    passes: activePass ? [activePass] : state.passes,
+                    activePassId: activePass ? activePass.id : 'pass_101'
+                };
+                const jsonStr = JSON.stringify(sharePayload);
+                const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                const shareUrl = `${window.location.origin}${window.location.pathname}#share=${b64}`;
+                copyTextToClipboard(shareUrl, 'Portable guest pass link copied! Open on any phone.');
+            } catch (err) {
+                console.error(err);
+                copyGeneratedPassUrl();
+            }
+        }
+
+        function saveStateToLocalStorage() {
+            if (state.isExportedGuestOnly || state.isPortableSharedView) return;
+            try {
+                saveActivePropertyToCollection();
+                localStorage.setItem('staypin_saved_state_v1', JSON.stringify(state));
             } catch (e) {}
         }
 
@@ -1651,7 +1946,7 @@
             }
 
             const cleanSlug = (state.propertyName || 'villasolis').toLowerCase().replace(/[^a-z0-9]+/g, '');
-            const passUrl = `https://staycraft.app/${cleanSlug}?pass=${activePass.id}`;
+            const passUrl = `https://staypin.app/${cleanSlug}?pass=${activePass.id}`;
             if (dispUrl) dispUrl.textContent = passUrl;
 
             if (dispMsg) {
@@ -1730,7 +2025,7 @@
         function copyAirbnbMessageTemplate() {
             const activePass = getActivePass();
             const cleanSlug = (state.propertyName || 'villasolis').toLowerCase().replace(/[^a-z0-9]+/g, '');
-            const passUrl = `https://staycraft.app/${cleanSlug}?pass=${activePass.id}`;
+            const passUrl = `https://staypin.app/${cleanSlug}?pass=${activePass.id}`;
             const msg = `Hi ${activePass.guestName}! Welcome to ${state.propertyName}. Here is your personal digital guidebook & arrival key: ${passUrl}\n\nNote: For your security, your smart door lock code will automatically activate on your arrival date and expire at checkout on ${state.checkOutTime}. Have a wonderful stay!\n— ${state.hostName}`;
             copyTextToClipboard(msg, 'Airbnb chat message copied to clipboard!');
         }
@@ -1783,6 +2078,24 @@
                 document.getElementById('upcoming-address').textContent = state.address;
                 const cleanPhone = (state.hostPhone || '').replace(/[^0-9]/g, '');
                 document.getElementById('upcoming-host-whatsapp').href = `https://wa.me/${cleanPhone}`;
+
+                // Dynamic Pre-Arrival Unlock Time calculation (Translated)
+                let unlockText = `Unlocks on arrival at ${state.checkInTime}`;
+                if (activePass && activePass.checkIn) {
+                    const d = new Date(activePass.checkIn);
+                    if (!isNaN(d.getTime())) {
+                        const lang = currentGuestLang || 'en';
+                        const localeMap = { en: 'en-US', it: 'it-IT', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
+                        const loc = localeMap[lang] || 'en-US';
+                        const dStr = d.toLocaleDateString(loc, { month: 'short', day: 'numeric' });
+                        const tStr = d.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' });
+                        const tDict = i18n[lang] || i18n.en;
+                        const tpl = tDict.unlocksAt || 'Unlocks {date} at {time}';
+                        unlockText = tpl.replace('{date}', dStr).replace('{time}', tStr);
+                    }
+                }
+                const unlockEl = document.getElementById('upcoming-unlock-time');
+                if (unlockEl) unlockEl.textContent = unlockText;
                 return;
             }
 
@@ -2407,7 +2720,7 @@
             document.getElementById('print-wifi-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=${wifiEncoded}`;
 
             // QR 2: Permanent Guidebook URL
-            const guideEncoded = encodeURIComponent(state.guidebookUrl || 'https://staycraft.app/villasolis');
+            const guideEncoded = encodeURIComponent(state.guidebookUrl || 'https://staypin.app/villasolis');
             document.getElementById('print-guide-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=${guideEncoded}`;
         }
 
@@ -2549,6 +2862,7 @@
 
         function resetToDefaultsPrompt() {
             if (confirm('Reset all property details to default sample values?')) {
+                localStorage.removeItem('staypin_saved_state_v1');
                 localStorage.removeItem('staycraft_saved_state_v2');
                 location.reload();
             }
@@ -2615,7 +2929,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'staycraft-project-backup.json';
+            a.download = 'staypin-project-backup.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
